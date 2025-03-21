@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="nnsp.xmlmappers.NcStatXmlMapper">
+
+	<select id="system_ct" parameterType="map" resultType="NcStatSys">
+		SELECT NOI_GCODE, NOI_OBJ_NM, ifnull(sum(b.outcnt),0) outcnt, ifnull(sum(b.outsize),0) outsize, ifnull(sum(c.incnt),0) incnt, ifnull(sum(c.insize),0) insize
+		FROM (
+			SELECT NOI_IP, NOI_OBJ_NM, NOI_GCODE
+			FROM NNC_OBJ_IPADDR
+			<if test="view_type eq 'SEND'.toString()">
+			WHERE NOI_GCODE != 4
+			</if>
+			<if test="view_type eq 'RECI'.toString()">
+			WHERE NOI_GCODE != 3
+			</if>
+		) a left join (
+			SELECT NSN_SRC_IP, sum(NSN_PACKET_CNT) outcnt, sum(NSN_PACKET_SIZE) outsize
+			FROM NNC_STAT_NETFLOW
+			GROUP BY NSN_SRC_IP
+		) b on (a.NOI_IP = b.NSN_SRC_IP) left join (
+			SELECT NSN_DST_IP, sum(NSN_PACKET_CNT) incnt, sum(NSN_PACKET_SIZE) insize
+			FROM NNC_STAT_NETFLOW
+			GROUP BY NSN_DST_IP
+		) c on (a.NOI_IP = c.NSN_DST_IP)
+		GROUP BY NOI_OBJ_NM
+	</select>
+	
+	<select id="system_detail" parameterType="map" resultType="NcStatSys">
+		SELECT NOI_IP, NOI_IP2, ifnull(sum(outcnt),0) outcnt, ifnull(sum(outsize),0) outsize, ifnull(sum(incnt),0) incnt, ifnull(sum(insize),0) insize
+		FROM (
+			SELECT NOI_IP, NSN_DST_IP NOI_IP2, b.outcnt, b.outsize, 0 incnt, 0 insize
+			FROM (
+				SELECT NOI_IP
+				FROM NNC_OBJ_IPADDR
+				WHERE NOI_GCODE=#{group_id}
+			) a left join (
+				SELECT NSN_SRC_IP, NSN_DST_IP, sum(NSN_PACKET_CNT) outcnt, sum(NSN_PACKET_SIZE) outsize
+				FROM NNC_STAT_NETFLOW
+				GROUP BY NSN_SRC_IP, NSN_DST_IP
+			) b on (a.NOI_IP = b.NSN_SRC_IP)
+			UNION ALL
+			SELECT NOI_IP, NSN_SRC_IP NOI_IP2, 0 outcnt, 0 outsize, b.incnt, b.insize
+			FROM (
+				SELECT NOI_IP
+				FROM NNC_OBJ_IPADDR
+				WHERE NOI_GCODE=#{group_id}
+			) a left join (
+				SELECT NSN_SRC_IP, NSN_DST_IP, sum(NSN_PACKET_CNT) incnt, sum(NSN_PACKET_SIZE) insize
+				FROM NNC_STAT_NETFLOW
+				GROUP BY NSN_SRC_IP, NSN_DST_IP
+			) b on (a.NOI_IP = b.NSN_DST_IP)
+		) aa
+	</select>
+	
+	<select id="service_tb" parameterType="map" resultType="NcStatSys">
+		SELECT getServiceName(NSN_PROTOCOL) SERVICE_NAME, PORT, ifnull(sum(outcnt),0) outcnt, ifnull(sum(outsize),0) outsize, ifnull(sum(incnt),0) incnt, ifnull(sum(insize),0) insize
+        FROM (
+			SELECT NSN_PROTOCOL, NSN_SRC_PORT PORT, 0 INSIZE, 0 INCNT, SUM(NSN_PACKET_SIZE) OUTSIZE, SUM(NSN_PACKET_CNT) OUTCNT
+			FROM NNC_STAT_NETFLOW
+		<if test="view_type eq 'SEND'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 4)
+		</if>
+		<if test="view_type eq 'RECI'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 3)
+		</if>
+			GROUP BY NSN_PROTOCOL, NSN_SRC_PORT
+			UNION ALL
+			SELECT NSN_PROTOCOL, NSN_DST_PORT PORT, SUM(NSN_PACKET_SIZE) INSIZE, SUM(NSN_PACKET_CNT) INCNT, 0 OUTSIZE, 0 OUTCNT
+			FROM NNC_STAT_NETFLOW
+		<if test="view_type eq 'SEND'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 4)
+		</if>
+		<if test="view_type eq 'RECI'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 3)
+		</if>
+			GROUP BY NSN_PROTOCOL, NSN_DST_PORT
+		) aa 
+        GROUP BY NSN_PROTOCOL, PORT
+	</select>
+	
+	<select id="service_detail" parameterType="map" resultType="NcStatSys">
+		SELECT NSN_SRC_IP, NSN_DST_IP, ifnull(sum(outcnt),0) outcnt, ifnull(sum(outsize),0) outsize, ifnull(sum(incnt),0) incnt, ifnull(sum(insize),0) insize
+        FROM (
+			SELECT NSN_SRC_IP, NSN_DST_IP, 0 INSIZE, 0 INCNT, SUM(NSN_PACKET_SIZE) OUTSIZE, SUM(NSN_PACKET_CNT) OUTCNT
+			FROM NNC_STAT_NETFLOW
+		<if test="view_type eq 'SEND'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 4)
+		</if>
+		<if test="view_type eq 'RECI'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 3)
+		</if>
+			AND NSN_PROTOCOL = #{protocol}
+            AND NSN_SRC_PORT = #{port}
+			UNION ALL
+			SELECT NSN_SRC_IP, NSN_DST_IP, SUM(NSN_PACKET_SIZE) INSIZE, SUM(NSN_PACKET_CNT) INCNT, 0 OUTSIZE, 0 OUTCNT
+			FROM NNC_STAT_NETFLOW
+		<if test="view_type eq 'SEND'.toString()">
+			WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 4)
+		</if>
+		<if test="view_type eq 'RECI'.toString()">
+			WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 3)
+		</if>
+			AND NSN_PROTOCOL = #{protocol}
+            AND NSN_DST_PORT = #{port}
+		) aa 
+        GROUP BY NSN_SRC_IP, NSN_DST_IP
+	</select>
+
+	<select id="progress_ct" parameterType="map" resultType="NcStatSys">
+		SELECT a.NSN_REG_DATE, ifnull(outcnt,0) outcnt, ifnull(outsize,0) outsize, ifnull(incnt,0) incnt, ifnull(insize,0) insize
+		FROM (
+			SELECT date_format(NSN_REG_DATE,'%Y-%m-%d %H:%i') NSN_REG_DATE
+			FROM NNC_STAT_NETFLOW
+			-- WHERE NSN_REG_DATE > DATE_ADD(now(), interval -1 hour)
+		) a left join (
+			SELECT date_format(NSN_REG_DATE,'%Y-%m-%d %H:%i') NSN_REG_DATE, SUM(NSN_PACKET_SIZE) OUTSIZE, SUM(NSN_PACKET_CNT) OUTCNT
+			FROM NNC_STAT_NETFLOW
+		<if test="view_type eq 'SEND'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 4)
+		</if>
+		<if test="view_type eq 'RECI'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 3)
+		</if>
+			AND NSN_PROTOCOL = #{protocol}
+			AND NSN_SRC_PORT = #{port}
+			GROUP BY date_format(NSN_REG_DATE,'%Y-%m-%d %H:%i')
+		) b on (a.NSN_REG_DATE = b.NSN_REG_DATE) left join (
+			SELECT date_format(NSN_REG_DATE,'%Y-%m-%d %H:%i') NSN_REG_DATE, SUM(NSN_PACKET_SIZE) INSIZE, SUM(NSN_PACKET_CNT) INCNT
+			FROM NNC_STAT_NETFLOW
+		<if test="view_type eq 'SEND'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 4)
+		</if>
+		<if test="view_type eq 'RECI'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 3)
+		</if>
+			AND NSN_PROTOCOL = #{protocol}
+			AND NSN_DST_PORT = #{port}
+			GROUP BY date_format(NSN_REG_DATE,'%Y-%m-%d %H:%i')
+		) c on (a.NSN_REG_DATE = c.NSN_REG_DATE)
+		ORDER BY NSN_REG_DATE
+	</select>
+	
+	<select id="getNetworkTraffic" parameterType="map" resultType="NcStatSys">
+		SELECT NSN_SRC_IP, NSN_DST_IP, SUM(NSN_PACKET_CNT) NSN_PACKET_CNT
+        FROM NNC_STAT_NETFLOW
+        <if test="view_type eq 'SEND'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 4)
+		</if>
+		<if test="view_type eq 'RECI'.toString()">
+            WHERE NSN_SRC_IP IN (SELECT NOI_IP FROM NNC_OBJ_IPADDR WHERE NOI_GCODE != 3)
+		</if>
+        GROUP BY NSN_SRC_IP, NSN_DST_IP
+	</select>
+	
+	<select id="login_ct" parameterType="map" resultType="NcLog">
+		SELECT date_format(NLM_CREATE_DATE,'%Y-%m-%d') NLM_CREATE_DATE, count(*) CNT
+		FROM NNC_LOG_MNG
+		WHERE NLM_PAGE = '로그인'
+		<if test="nlm_result eq 'S'.toString()">
+			AND NLM_RESULT = 'S'
+		</if>
+		<if test="nlm_result eq 'F'.toString()">
+			AND (NLM_RESULT = 'F' OR NLM_RESULT = 'L')
+		</if>
+		<if test="nsu_id != ''">
+			AND NSU_ID = #{nsu_id}
+		</if>
+		AND date_format(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+		AND date_format(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+		GROUP BY date_format(NLM_CREATE_DATE,'%Y-%m-%d')
+	</select>
+	
+	<select id="login_tb" parameterType="map" resultType="NcLog">
+		SELECT NSU_ID, COUNT(*) CNT, COUNT(IF(NLM_RESULT='S',1,NULL)) as SCNT
+		FROM NNC_LOG_MNG
+		WHERE NLM_PAGE = '로그인'
+		AND date_format(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+		AND date_format(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+		<if test="nsu_id != ''">
+			AND NSU_ID = #{nsu_id}
+		</if>
+		GROUP BY NSU_ID ORDER BY NSU_ID
+	</select>
+  	
+  	<select id="config_ct" parameterType="map" resultType="NcLog">
+  		SELECT date_format(NLM_CREATE_DATE,'%Y-%m-%d') NLM_CREATE_DATE, COUNT(*) CNT
+		FROM (
+			SELECT NLM_CREATE_DATE, NLM_PAGE
+			FROM NNC_LOG_MNG
+			WHERE date_format(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+			AND date_format(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+			<if test="nsu_id != ''">
+				AND NSU_ID = #{nsu_id}
+			</if>
+			UNION ALL
+			SELECT NLP_CREATE_DATE, NLP_PAGE
+			FROM NNC_LOG_POLICY
+			WHERE date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+			AND date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+			<if test="nsu_id != ''">
+				AND NSU_ID = #{nsu_id}
+			</if>
+		) a
+		<if test="type eq 'MNG'.toString()">
+		WHERE (IF(NLM_PAGE LIKE '관리자 계정%',1,2)=1 OR IF(NLM_PAGE LIKE '관리자 접속%',1,2)=1 OR IF(NLM_PAGE LIKE '로그인 설정%',1,2)=1)
+		</if>
+		<if test="type eq 'INT'.toString()">
+		WHERE (IF(NLM_PAGE LIKE '내부 송신 시스템%',1,2)=1 OR IF(NLM_PAGE LIKE '외부 수신 시스템%',1,2)=1 OR IF(NLM_PAGE LIKE '정방향 무결성%',1,2)=1 OR IF(NLM_PAGE LIKE '정방향 프로그램%',1,2)=1)
+		</if>
+		<if test="type eq 'EXT'.toString()">
+		WHERE (IF(NLM_PAGE LIKE '내부 수신 시스템%',1,2)=1 OR IF(NLM_PAGE LIKE '외부 송신 시스템%',1,2)=1 OR IF(NLM_PAGE LIKE '역방향 무결성%',1,2)=1 OR IF(NLM_PAGE LIKE '역방향 프로그램%',1,2)=1)
+		</if>
+		<if test="type eq 'ETC'.toString()">
+		WHERE (IF(NLM_PAGE LIKE '로그 관리%',1,2)=1 OR IF(NLM_PAGE LIKE '메일 설정%',1,2)=1 OR IF(NLM_PAGE LIKE '%장비소개%',1,2)=1 OR IF(NLM_PAGE LIKE '%콘텐츠%',1,2)=1)
+		</if>
+		GROUP BY date_format(NLM_CREATE_DATE,'%Y-%m-%d')
+	</select>
+	
+	<select id="config_tb" parameterType="map" resultType="NcLog">
+		SELECT COUNT(IF(LOG_PAGE LIKE '관리자 계정%',1,NULL)) as ACC, COUNT(IF(LOG_PAGE LIKE '관리자 접속%',1,NULL)) as ACCIP, COUNT(IF(LOG_PAGE LIKE '로그인 설정%',1,NULL)) as LOGIN, 
+			COUNT(IF(LOG_PAGE LIKE '내부 송신 시스템%',1,NULL)) as INTS, COUNT(IF(LOG_PAGE LIKE '외부 수신 시스템%',1,NULL)) as EXTR, COUNT(IF(LOG_PAGE LIKE '정방향 무결성%',1,NULL)) as FWDIG, COUNT(IF(LOG_PAGE LIKE '정방향 프로그램%',1,NULL)) as FWDPG,
+			COUNT(IF(LOG_PAGE LIKE '내부 수신 시스템%',1,NULL)) as INTR, COUNT(IF(LOG_PAGE LIKE '외부 송신 시스템%',1,NULL)) as EXTS, COUNT(IF(LOG_PAGE LIKE '역방향 무결성%',1,NULL)) as RVSIG, COUNT(IF(LOG_PAGE LIKE '역방향 프로그램%',1,NULL)) as RVSPG,
+			COUNT(IF(LOG_PAGE LIKE '로그 관리%',1,NULL)) as LOG, COUNT(IF(LOG_PAGE LIKE '메일 설정%',1,NULL)) as MAIL, COUNT(IF(LOG_PAGE LIKE '%장비소개%',1,NULL)) as PRODT, COUNT(IF(LOG_PAGE LIKE '%콘텐츠%',1,NULL)) as CONTS
+		FROM (
+			SELECT NLM_PAGE LOG_PAGE 
+			FROM NNC_LOG_MNG
+			WHERE date_format(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+			AND date_format(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+			<if test="nsu_id != ''">
+				AND NSU_ID = #{nsu_id}
+			</if>
+			UNION ALL
+			SELECT NLP_PAGE LOG_PAGE
+			FROM NNC_LOG_POLICY
+			WHERE date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+			AND date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+			<if test="nsu_id != ''">
+				AND NSU_ID = #{nsu_id}
+			</if>
+		) a
+	</select>
+	
+	<select id="policy_ct" parameterType="map" resultType="NcLog">
+		SELECT date_format(NLP_CREATE_DATE,'%Y-%m-%d') NLP_CREATE_DATE, COUNT(*) CNT
+		FROM NNC_LOG_POLICY
+		WHERE date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlp_create_sdate}
+		AND date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlp_create_edate}
+		<if test="nsu_id != ''">
+			AND NSU_ID = #{nsu_id}
+		</if>
+		<if test="type eq 'S'.toString()">
+			AND (IF(NLP_PAGE LIKE '정방향 전송 통제%',1,2)=1)
+		</if>
+		<if test="type eq 'R'.toString()">
+			AND (IF(NLP_PAGE LIKE '역방향 전송 통제%',1,2)=1)
+		</if>
+		GROUP BY date_format(NLP_CREATE_DATE,'%Y-%m-%d')
+	</select>
+	
+	<select id="policy_tb_bak" parameterType="map" resultType="NcLog">
+		SELECT COUNT(IF(NLP_PAGE LIKE '내부 접속 허용 IP%',1,NULL)) as SIP, COUNT(IF(NLP_PAGE LIKE '내부 접속 허용 서비스%',1,NULL)) as SSVC,
+			COUNT(IF(NLP_PAGE LIKE '내부 접속 허용 정책%',1,NULL)) as SPA, COUNT(IF(NLP_PAGE LIKE '내부 전송 통제 정책%',1,NULL)) as SPS,
+			COUNT(IF(NLP_PAGE LIKE '외부 접속 허용 IP%',1,NULL)) as RIP, COUNT(IF(NLP_PAGE LIKE '외부 접속 허용 서비스%',1,NULL)) as RSVC,
+			COUNT(IF(NLP_PAGE LIKE '외부 접속 허용 정책%',1,NULL)) as RPA, COUNT(IF(NLP_PAGE LIKE '외부 전송 통제 정책%',1,NULL)) as RPS
+		FROM NNC_LOG_POLICY
+		WHERE (substr(NLP_PAGE,1,2)='내부' OR substr(NLP_PAGE,1,2)='외부')
+		AND date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlp_create_sdate}
+		AND date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlp_create_edate}
+		<if test="nsu_id != ''">
+			AND NSU_ID = #{nsu_id}
+		</if>
+	</select>
+	
+	<select id="policy_tb" parameterType="map" resultType="NcLog">
+		SELECT COUNT(IF(NLP_PAGE LIKE '정방향 전송 통제%',1,NULL)) as INTERNAL,
+			COUNT(IF(NLP_PAGE LIKE '역방향 전송 통제%',1,NULL)) as EXTERNAL
+		FROM NNC_LOG_POLICY
+		WHERE date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlp_create_sdate}
+		AND date_format(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlp_create_edate}
+		<if test="nsu_id != ''">
+			AND NSU_ID = #{nsu_id}
+		</if>
+	</select>
+	
+	<select id="receive_tb" parameterType="map" resultType="NcStatNw">
+		SELECT NCP.NCP_NAME, NSR_PG_FNAME, NSR.NSR_BYTE 
+		FROM (
+			SELECT NSR_PG_FNAME, SUM(NSR_BYTE) NSR_BYTE
+			FROM NNC_STAT_RECV
+			WHERE NSR_DATE <![CDATA[>=]]> #{nsr_sdate}
+			AND NSR_DATE <![CDATA[<=]]> #{nsr_edate}
+			GROUP BY NSR_PG_FNAME
+			ORDER BY NSR_BYTE DESC
+			LIMIT 10
+		) NSR, NNC_CONF_PROGRAM NCP
+		WHERE NSR.NSR_PG_FNAME = NCP.NCP_FILE_NAME
+		ORDER BY NSR_BYTE DESC
+	</select>
+	
+	<select id="receive_ct" parameterType="map" resultType="NcStatNw">
+		SELECT date_format(NSR_DATE,'%Y-%m-%d %H:%i') STAT_DATE, SUM(NSR_BYTE) STAT_SUM
+		FROM NNC_STAT_RECV
+		WHERE NSR_PG_FNAME = #{nsr_pg_fname}
+		AND NSR_DATE <![CDATA[>=]]> #{nsr_sdate}
+		AND NSR_DATE <![CDATA[<=]]> #{nsr_edate}
+		GROUP BY date_format(NSR_DATE,'%Y-%m-%d %H:%i')
+		ORDER BY NSR_DATE
+	</select>
+		
+	<select id="send_tb" parameterType="map" resultType="NcStatNw">
+		SELECT NCP.NCP_NAME, NSS_PG_FNAME, NSS.NSS_BYTE 
+		FROM (
+			SELECT NSS_PG_FNAME, SUM(NSS_BYTE) NSS_BYTE
+			FROM NNC_STAT_SEND
+			WHERE NSS_DATE <![CDATA[>=]]> #{nss_sdate}
+			AND NSS_DATE <![CDATA[<=]]> #{nss_edate}
+			GROUP BY NSS_PG_FNAME
+			ORDER BY NSS_BYTE DESC
+			LIMIT 10
+		) NSS, NNC_CONF_PROGRAM NCP
+		WHERE NSS.NSS_PG_FNAME = NCP.NCP_FILE_NAME
+		ORDER BY NSS_BYTE DESC
+	</select>
+	
+	<select id="send_ct" parameterType="map" resultType="NcStatNw">
+		SELECT date_format(NSS_DATE,'%Y-%m-%d %H:%i') STAT_DATE, SUM(NSS_BYTE) STAT_SUM, NSS_PG_FNAME
+		FROM NNC_STAT_SEND
+		WHERE NSS_PG_FNAME = #{nss_pg_fname}
+		AND NSS_DATE <![CDATA[>=]]> #{nss_sdate}
+		AND NSS_DATE <![CDATA[<=]]> #{nss_edate}
+		GROUP BY date_format(NSS_DATE,'%Y-%m-%d %H:%i')
+		ORDER BY NSS_DATE
+	</select>
+	
+	<select id="repe_byte_tb" parameterType="map" resultType="NcStatNw">
+		SELECT NCP.NCP_NAME, NSRP_PG_FNAME, NSRP.NSRP_BYTE 
+		FROM (
+			SELECT NSRP_PG_FNAME, SUM(NSRP_BYTE) NSRP_BYTE
+			FROM NNC_STAT_REPE
+			WHERE NSRP_DATE <![CDATA[>=]]> #{nsrp_sdate}
+			AND NSRP_DATE <![CDATA[<=]]> #{nsrp_edate}
+			GROUP BY NSRP_PG_FNAME
+			ORDER BY NSRP_BYTE DESC
+			LIMIT 10
+		) NSRP, NNC_CONF_PROGRAM NCP
+		WHERE NSRP.NSRP_PG_FNAME = NCP.NCP_FILE_NAME
+		ORDER BY NSRP_BYTE DESC
+	</select>
+	
+	<select id="repe_byte_ct" parameterType="map" resultType="NcStatNw">
+		SELECT date_format(NSRP_DATE,'%Y-%m-%d %H:%i') STAT_DATE, SUM(NSRP_BYTE) STAT_SUM, NSRP_PG_FNAME
+		FROM NNC_STAT_REPE
+		WHERE NSRP_PG_FNAME = #{nsrp_pg_fname}
+		AND NSRP_DATE <![CDATA[>=]]> #{nsrp_sdate}
+		AND NSRP_DATE <![CDATA[<=]]> #{nsrp_edate}
+		GROUP BY date_format(NSRP_DATE,'%Y-%m-%d %H:%i')
+		ORDER BY NSRP_DATE
+	</select>
+	
+	<select id="repe_loss_tb" parameterType="map" resultType="NcStatNw">
+		SELECT NCP.NCP_NAME, NSRP_PG_FNAME, NSRP.NSRP_LOSS_YN 
+		FROM (
+			SELECT NSRP_PG_FNAME, SUM(NSRP_LOSS_YN) NSRP_LOSS_YN
+			FROM NNC_STAT_REPE
+			WHERE NSRP_DATE <![CDATA[>=]]> #{nsrp_sdate}
+			AND NSRP_DATE <![CDATA[<=]]> #{nsrp_edate}
+			GROUP BY NSRP_PG_FNAME
+			ORDER BY NSRP_LOSS_YN DESC
+			LIMIT 10
+		) NSRP, NNC_CONF_PROGRAM NCP
+		WHERE NSRP.NSRP_PG_FNAME = NCP.NCP_FILE_NAME
+		ORDER BY NSRP_LOSS_YN DESC
+	</select>
+	
+	<select id="repe_loss_ct" parameterType="map" resultType="NcStatNw">
+		SELECT date_format(NSRP_DATE,'%Y-%m-%d %H:%i') STAT_DATE, SUM(NSRP_LOSS_YN) STAT_SUM, NSRP_PG_FNAME
+		FROM NNC_STAT_REPE
+		WHERE NSRP_PG_FNAME = #{nsrp_pg_fname}
+		AND NSRP_DATE <![CDATA[>=]]> #{nsrp_sdate}
+		AND NSRP_DATE <![CDATA[<=]]> #{nsrp_edate}
+		GROUP BY date_format(NSRP_DATE,'%Y-%m-%d %H:%i')
+		ORDER BY NSRP_DATE
+	</select>
+	
+	<select id="realtime_log" parameterType="map" resultType="NcLog">
+		SELECT DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLE_CREATE_DATE, NLE_HOST_NAME, 
+			(CASE NLE_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLE_RISK_LEVEL, NLE_PROG_NAME, NLE_MESSAGE, NPL_NAME
+		FROM NNC_LOG_EVENT NLE LEFT JOIN NNC_POLICY_LINK NPL ON (NLE.NLE_PROG_NAME = NPL.NPL_NO)
+		<if test="nle_div == 1">
+			WHERE (NLE_DIV=1 OR NLE_DIV=2)
+		</if>
+		<if test="nle_div == 3">
+			WHERE (NLE_DIV=3 OR NLE_DIV=4)
+		</if>
+		AND NLE_CREATE_DATE <![CDATA[>=]]> #{nle_create_sdate}
+		AND NLE_CREATE_DATE <![CDATA[<=]]> #{nle_create_edate}
+		ORDER BY NLE_SEQ DESC
+	</select>
+	
+	<select id="service_ct_traffic_in" parameterType="map" resultType="NcStatNw">
+		CALL nnet_cds2.getSvcChartData(#{svc_sdate}, #{svc_edate}, #{in_out}) 
+	</select>
+	
+	<select id="service_ct_traffic_out" parameterType="map" resultType="NcStatNw">
+		CALL nnet_cds2.getSvcChartData(#{svc_sdate}, #{svc_edate}, #{in_out}) 
+	</select>
+	
+	<select id="getCenterChartData" parameterType="map" resultType="NcStatNw">
+		CALL nnet_cds2.getCenterChartData(#{ccd_sdate}, #{ccd_edate}, #{wl_id}, #{ps_inout}, #{ps_detect}) 
+	</select>
+	
+	<select id="getThreatChartData" parameterType="map" resultType="NcStatNw">
+		CALL nnet_cds2.getThreatChartData(#{tcd_sdate}, #{tcd_edate}, #{ps_inout}) 
+	</select>
+	
+	<select id="prot_log" parameterType="map" resultType="NcLog">
+		SELECT DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLPT_CREATE_DATE, NLPT_HOST_NAME,
+		(CASE NLPT_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLPT_RISK_LEVEL,
+		NLPT_PROG_NAME, NLPT_MESSAGE
+		FROM NNC_LOG_PROTECTION NLP
+		<if test="nlpt_div == 1">
+			WHERE (NLPT_DIV=1 OR NLPT_DIV=2)
+		</if>
+		<if test="nlpt_div == 3">
+			WHERE (NLPT_DIV=3 OR NLPT_DIV=4)
+		</if>
+		AND NLPT_CREATE_DATE <![CDATA[>=]]> #{nlpt_create_sdate}
+		AND NLPT_CREATE_DATE <![CDATA[<=]]> #{nlpt_create_edate}
+		ORDER BY NLPT_SEQ DESC
+		LIMIT ${limit}
+	</select>
+</mapper>

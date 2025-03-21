@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:sec="http://www.springframework.org/schema/security"
+    xmlns:websocket="http://www.springframework.org/schema/websocket"
+    
+    xsi:schemaLocation="http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/util
+	http://www.springframework.org/schema/util/spring-util.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context.xsd
+	http://www.springframework.org/schema/security
+	https://www.springframework.org/schema/security/spring-security-5.8.xsd
+	http://www.springframework.org/schema/websocket
+	https://www.springframework.org/schema/websocket/spring-websocket.xsd">
+    	
+    <!-- Root Context: defines shared resources visible to all other web components -->
+	<context:annotation-config />
+		<context:component-scan base-package="nnsp.services"/>
+		<context:component-scan base-package="nnsp.common"/>
+		<context:component-scan base-package="nnsp.mapper"/>
+			
+  <bean class="nnsp.security.RSAUtil" id="rsaUtil"/>
+			
+	<!-- JDBC setting -->
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+ 
+    <!-- DataSource Configuration -->
+    <bean id="dataSource" class="nnsp.common.DecryptDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <!-- 특정 시간마다 validationQuery를 실행 시작 -->
+        <property name="validationQuery" value="select 1"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="timeBetweenEvictionRunsMillis" value="7200000"/>
+        <!-- 특정 시간마다 validationQuery를 실행 끝 -->
+	</bean>
+    
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="typeAliasesPackage" value="nnsp.vo" />
+    </bean>
+    
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+    </bean>
+    
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">  
+		<property name="dataSource" ref="dataSource" />  
+    </bean>  
+          
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    
+    <bean id="ncPolicyLinkMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcPolicyLinkMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+    
+	<bean id="ncUserMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcUserMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+    
+	<bean id="ncDoorayUserMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcDoorayUserMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+    
+    <bean id="ncAuditMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcAuditMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+    
+    <bean id="ncStatMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcStatMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+    
+	<bean id="ncMenuMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcMenuMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="ncPolicyMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcPolicyMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+    
+    <bean id="ncConfigMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcConfigMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="ncLogMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcLogMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="ncLinkPolicyMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcLinkPolicyMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="ncAlarmMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcAlarmMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 장비소개 정보 -->
+	<bean id="ncProductMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcProductMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="ncDashMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcDashMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="ncLogDateMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcLogDateMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="ncCommonMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcCommonMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id="ncWhMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NcWhMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- nNetNDR -->
+	<bean id="ndrAnalyzeMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+		<property name="mapperInterface" value="nnsp.mappers.NdrAnalyzeMapper" />
+		<property name="sqlSessionFactory" ref="sqlSessionFactory" />
+	</bean>
+	
+	<bean id ="SessionLocaleResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"/>
+
+	<!-- excel download -->
+	<bean id="NcLogCsv" class="nnsp.controllers.NcLogCsv" />
+
+    <!-- scan for mappers and let them be autowired -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="nnsp.xmlmappers" />
+    </bean>
+	      
+	<!-- 세션 만료 제어 --> 
+    <bean id="sessionDestoryListener" class="nnsp.common.SessionDestoryListener" />
+	
+	<bean class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler"/>     
+	
+	<bean class="nnsp.common.DefaultAuthenticationSuccessHandler" id="authenticationSuccessHandler" />
+    <bean class="nnsp.common.DefaultAuthenticationFailureHandler" id="authenticationFailureHandler" />
+    <bean class="nnsp.common.DefaultLogoutSuccessHandler" id="logoutSuccessHandler"/>
+    
+    <!-- use-expressions : RoleVoter로 구현되는 표준 Role 기반 방식 대신 SpEL(Spring Expression Language)를 사용해서 복잡한 vote 규칙을 정의 -->
+	<sec:http auto-config="false" use-expressions="true">
+	  	<sec:headers>
+	        <sec:frame-options policy="SAMEORIGIN"/>
+	    </sec:headers>
+        <sec:intercept-url pattern="/login.do" access="permitAll" />
+        <sec:intercept-url pattern="/login_duplicate.do" access="permitAll" />
+        <sec:intercept-url pattern="/sqlexec.do" access="permitAll" />
+        <sec:intercept-url pattern="/session_check.do" access="permitAll" />
+        <sec:intercept-url pattern="/dbpasswd_change.do" access="permitAll" />
+        <sec:intercept-url pattern="/dooray_login.do" access="permitAll" />
+        <sec:intercept-url pattern="/dooray_login_check.do" access="permitAll" />
+        <sec:intercept-url pattern="/dooray_id_check.do" access="permitAll" />
+        <sec:intercept-url pattern="/dooray_pw_check.do" access="permitAll" />
+        <sec:intercept-url pattern="/dooray_insert_user.do" access="permitAll" />
+        <sec:intercept-url pattern="/main.do" access="(hasAnyRole('ROLE_ADMIN','ROLE_USER')) and fullyAuthenticated"/>
+        <sec:intercept-url pattern="/**" access="(hasAnyRole('ROLE_ADMIN','ROLE_USER')) and fullyAuthenticated" />
+        
+        <sec:form-login login-page="/login.do" 
+	    	 login-processing-url="/login_check.do" 
+	         always-use-default-target="false"
+	         authentication-success-handler-ref="authenticationSuccessHandler" 
+	         authentication-failure-handler-ref="authenticationFailureHandler" />
+         
+        <sec:logout delete-cookies="JSESSIONID" invalidate-session="true" logout-url="/logout.do" success-handler-ref="logoutSuccessHandler"/>
+        
+        <sec:session-management session-fixation-protection="migrateSession" invalid-session-url="/login.do">
+      		<sec:concurrency-control expired-url="/login_duplicate.do" max-sessions="1" error-if-maximum-exceeded="false" session-registry-alias="sessionRegistry"/>
+    	</sec:session-management>
+    	
+<!-- 		<sec:custom-filter after="SECURITY_CONTEXT_FILTER" ref="sessionIdValidationFilter" /> -->
+<!-- 		<sec:custom-filter after="BASIC_AUTH_FILTER" ref="sessionIpValidationFilter" /> -->
+<!-- 		<sec:custom-filter before="EXCEPTION_TRANSLATION_FILTER" ref="sessionInformationChangeFilter" /> -->
+    </sec:http>
+    
+	<bean id="customCsrfFilter" class="nnsp.security.filter.CustomCsrfFilter">
+		<constructor-arg>
+			<bean class="nnsp.security.repository.CustomCsrfTokenRepository">
+				<property name="headerName" value="X-SECURITY" />
+			</bean>
+		</constructor-arg>
+	</bean>
+    
+    <bean class="nnsp.common.DefaultAuthenticationProvider" id="defaultAuthenticationProvider" /> 
+    
+    <sec:authentication-manager>
+		<sec:authentication-provider ref="defaultAuthenticationProvider"/>
+    </sec:authentication-manager>
+
+</beans>

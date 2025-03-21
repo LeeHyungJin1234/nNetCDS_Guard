@@ -1,0 +1,155 @@
+@charset "UTF-8";
+/* Grid css */
+.dx-datagrid-headers {
+    color: #555;
+    font-weight: 700;
+}
+
+.dx-datagrid-borders>.dx-datagrid-filter-panel, .dx-datagrid-borders>.dx-datagrid-headers {
+    border-top: 1px solid #333;
+    background-color: white;
+}
+
+.dx-datagrid-borders .dx-datagrid-rowsview, .dx-datagrid-headers + .dx-datagrid-rowsview, .dx-datagrid-rowsview .dx-datagrid-after-headers {
+    border-bottom: 1px solid #333;
+}
+
+.dx-datagrid-headers .dx-datagrid-table .dx-row>td {
+    background-color: #f8f8f8;
+}
+
+.dx-datagrid-content .dx-datagrid-table .dx-row>td,.dx-datagrid-content .dx-datagrid-table .dx-row>tr>td {
+    vertical-align: middle;
+}
+
+.dx-datagrid-summary-item {
+    font-weight: 400;
+    color: rgba(51,51,51);
+}
+
+.dx-datagrid .dx-header-filter {
+    font: 14px/1 DXIcons;
+}
+
+.dx-datagrid-table tr:hover {
+    background-color: #f1f1f1;
+    cursor:pointer;
+}
+
+.dx-datagrid .dx-row-lines>td {
+	border-bottom: 1px solid #eaeaea;
+}
+
+/* Paging css */
+/* .dx-pager .dx-pages .dx-page {
+    padding: 4px 0px 0px;
+    width: 25px;
+    height: 25px;
+}
+
+.dx-pager .dx-pages .dx-page {
+    display: inline-block;
+    cursor: pointer;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.dx-pager .dx-page, .dx-pager .dx-page-size {
+    border-radius: 50%;
+} */
+
+.dx-pager .dx-page-sizes .dx-selection, .dx-pager .dx-pages .dx-selection {
+    color: #fff;
+    background-color: #343b4d;
+}
+
+/* Tree List css */
+.dx-treelist-headers {
+    color: #555;
+    font-weight: 700;
+}
+
+.dx-treelist-borders>.dx-treelist-filter-panel, .dx-treelist-borders>.dx-treelist-headers {
+    border-top: 1px solid #333;
+}
+
+.dx-treelist-borders .dx-treelist-rowsview, .dx-treelist-headers + .dx-treelist-rowsview, .dx-treelist-rowsview .dx-treelist-after-headers {
+    border-bottom: 1px solid #333;
+}
+
+.dx-treelist-headers .dx-treelist-table .dx-row>td {
+    background-color: #f8f8f8;
+}
+
+.dx-treelist-content .dx-treelist-table .dx-row>td, .dx-treelist-content .dx-treelist-table .dx-row>tr>td {
+    vertical-align: middle;
+}
+
+.dx-treelist-table tr:hover {
+    background-color: #f1f1f1;
+    cursor:pointer;
+}
+
+.dotAsset, .dotRisk1{
+	background-image:url("/img/analyze/dot1.png");
+	background-repeat: no-repeat;
+	background-size: 5px 80%;
+	background-position:0% 50%;
+	padding-left:20px !important;
+}
+.dotUnknown, .dotRisk2{
+	background-image:url("/img/analyze/dot2.png");
+	background-repeat: no-repeat;
+	background-size: 5px 80%;
+	background-position:0% 50%;
+	padding-left:20px !important;
+}
+.dotThreats, .dotExternal, .dotRisk3{
+	background-image:url("/img/analyze/dot3.png");
+	background-repeat: no-repeat;
+	background-size: 5px 80%;
+	background-position:0% 50%;
+	padding-left:20px !important;
+}
+.dotMalware, .dotRisk4{
+	background-image:url("/img/analyze/dot4.png");
+	background-repeat: no-repeat;
+	background-size: 5px 80%;
+	background-position:0% 50%;
+	padding-left:20px !important;
+}
+.dotWhiteList{
+	background-image:url("/img/analyze/dot3.png");
+	background-repeat: no-repeat;
+	background-size: 5px 80%;
+	background-position:0% 50%;
+	padding-left:20px !important;
+}
+.dotWhiteFlow{
+	background-image:url("/img/analyze/dot2.png");
+	background-repeat: no-repeat;
+	background-size: 5px 100%;
+	background-position:0px 1px;
+	padding-left:20px !important;
+}
+.dotOt{
+	background-image:url("/img/analyze/dotIt.png");
+	background-repeat: no-repeat;
+	background-size: 5px 100%;
+	background-position:0% 50%;
+	padding-left:20px !important;
+}
+.dotIt{
+	background-image:url("/img/analyze/dotOt.png");
+	background-repeat: no-repeat;
+	background-size: 5px 100%;
+	background-position:0% 50%;
+	padding-left:20px !important;
+}
+.dotRisk0{
+	background-image:url("/img/analyze/dot0.png");
+	background-repeat: no-repeat;
+	background-size: 5px 80%;
+	background-position:0% 50%;
+	padding-left:20px !important;
+}

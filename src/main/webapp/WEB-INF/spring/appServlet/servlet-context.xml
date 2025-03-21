@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:beans="http://www.springframework.org/schema/beans"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:task="http://www.springframework.org/schema/task"
+  xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/task https://www.springframework.org/schema/task/spring-task.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven /> <!-- 어노테이션을 사용하겠다고 선언 -->
+	
+	<context:annotation-config/>
+
+	<!-- nnsp.controllers 하위 모든 패키지에 있는 파일의 어노테이션을 스캔해서 빈으로 등록 -->
+	<context:component-scan base-package="nnsp.controllers"/>
+	<context:component-scan base-package="nnsp.util"/>
+	
+	<!-- nnsp.scheduler 하위 패키지를 스케쥴러에 등록 -->
+	<context:component-scan base-package="nnsp.scheduler"/>
+	<task:annotation-driven scheduler="jobScheduler"/>
+	<task:scheduler id="jobScheduler" pool-size="1"/>
+	
+	
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/">
+	  <resource-chain resource-cache="false">
+	    <resolvers>
+	      <version-resolver>
+	        <content-version-strategy patterns="/**"/>
+	      </version-resolver>
+	    </resolvers>
+	  </resource-chain>
+	</resources>
+
+	<!-- message source -->
+	<beans:bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<beans:property name="basename" value="classpath:/messages/message" />
+		<beans:property name="defaultEncoding" value="utf-8"/>
+	</beans:bean>
+	<beans:bean id="messageSourceAccessor" class="org.springframework.context.support.MessageSourceAccessor">
+        <beans:constructor-arg ref="messageSource"/>
+    </beans:bean>
+    <beans:bean id="messageUtil" class="nnsp.util.MessageUtil">
+        <beans:property name="messageSourceAccessor" ref="messageSourceAccessor"/>
+    </beans:bean>
+
+	<beans:bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+		<!-- beans:property name="defaultLocale" value="en" / -->
+		<beans:property name="defaultLocale" value="ko" />
+	</beans:bean>
+
+	<beans:bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+		<beans:property name="paramName" value="lang" />
+	</beans:bean>
+	
+	<beans:bean id="beanNameViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver">
+		<beans:property name="order" value="1" />
+	</beans:bean>
+	<beans:bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter" />
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<beans:bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="viewClass">
+			<beans:value>org.springframework.web.servlet.view.JstlView</beans:value>
+		</beans:property>
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+		<beans:property name="order" value="2" />
+	</beans:bean>
+	
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" /> <!-- 파일 업로드 -->
+	
+	<beans:bean class="java.util.Locale" id="locale">
+		<beans:constructor-arg>
+			<!-- beans:value>en</beans:value -->
+			<beans:value>ko</beans:value>
+		</beans:constructor-arg>
+		<beans:constructor-arg>
+			<!-- beans:value>US</beans:value -->
+			<beans:value>KR</beans:value>
+		</beans:constructor-arg>
+	</beans:bean>
+	
+	<beans:bean class="nnsp.common.Config" id="config">
+		<beans:constructor-arg ref="locale" />
+	</beans:bean>
+	
+</beans:beans>

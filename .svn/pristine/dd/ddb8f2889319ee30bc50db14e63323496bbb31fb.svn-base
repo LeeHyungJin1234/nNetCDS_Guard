@@ -1,0 +1,484 @@
+package nnsp.vo;
+
+import java.io.Serializable;
+
+@SuppressWarnings("serial")
+public class NcWhList implements Serializable {
+	//GroupList
+	int ngl_id;
+	String ngl_group_name;
+	String ngl_group_desc;
+	int ngl_group_stat;
+	
+	public int getNgl_id() {
+		return ngl_id;
+	}
+	public void setNgl_id(int ngl_id) {
+		this.ngl_id = ngl_id;
+	}
+	public String getNgl_group_name() {
+		return ngl_group_name;
+	}
+	public void setNgl_group_name(String ngl_group_name) {
+		this.ngl_group_name = ngl_group_name;
+	}
+	public String getNgl_group_desc() {
+		return ngl_group_desc;
+	}
+	public void setNgl_group_desc(String ngl_group_desc) {
+		this.ngl_group_desc = ngl_group_desc;
+	}
+	public int getNgl_group_stat() {
+		return ngl_group_stat;
+	}
+	public void setNgl_group_stat(int ngl_group_stat) {
+		this.ngl_group_stat = ngl_group_stat;
+	}
+	
+	
+	//host_type
+	int nht_seq;
+	int nht_id;
+	String nht_name;
+	
+	public int getNht_seq() {
+		return nht_seq;
+	}
+	public void setNht_seq(int nht_seq) {
+		this.nht_seq = nht_seq;
+	}
+	public int getNht_id() {
+		return nht_id;
+	}
+	public void setNht_id(int nht_id) {
+		this.nht_id = nht_id;
+	}
+	public String getNht_name() {
+		return nht_name;
+	}
+	public void setNht_name(String nht_name) {
+		this.nht_name = nht_name;
+	}
+	
+	
+
+	// white List
+	long wl_id;
+	String strWlId;
+	int wl_ngl_id;
+	String wl_proto_id;
+	String wl_proto_sub_type;
+	String wl_proto_sub_dec;
+	String wl_proto_ics;
+	String wl_proto_ics_type;
+	String wl_proto_ics_cmd_type;
+	long wl_length;
+	String wl_dst_mac;
+	String wl_src_mac;
+	String wl_ether_type;
+	String wl_ether_type_dec;
+	String wl_dsap;
+	String wl_ssap;
+	String wl_organization;
+	String wl_src_host_type;
+	String wl_dst_host_type;
+	String wl_src_ip;
+	String wl_dst_ip;
+	String wl_src_eip;
+	String wl_dst_eip;
+	String wl_src_port_type;
+	String wl_dst_port_type;
+	String wl_src_port;
+	String wl_dst_port;
+	String wl_func1;
+	String wl_func2;
+	String wl_func3;
+	String wl_func4;
+	String wl_func5;
+	String wl_func6;
+	String wl_func7;
+	String wl_func8;
+	String wl_func9;
+	String wl_func10;
+	String wl_func11;
+	String wl_func12;
+	String wl_func13;
+	String wl_func14;
+	String wl_list_sig;
+	long wl_payload_length;
+	int wl_flow;
+	String wl_flow_txt;
+	int wl_standard;
+	String wl_standard_txt;
+	int wl_avg_count;
+	int wl_count_min;
+	int wl_use_yn;
+	String wl_regdttm;
+	String wl_sregdttm;
+	String wl_eregdttm;
+	int ps_inout;
+	String strPsInOut;
+	
+	
+	public int getPs_inout() {
+		return ps_inout;
+	}
+	public void setPs_inout(int ps_inout) {
+		this.ps_inout = ps_inout;
+		if(ps_inout == 0)
+			this.strPsInOut = "Outbound";
+		else if(ps_inout == 1)
+			this.strPsInOut = "Inbound";
+	}
+	public String getStrPsInOut() {
+		return strPsInOut;
+	}
+	
+	
+	public long getWl_id() {
+		return wl_id;
+	}
+	public void setWl_id(long wl_id) {
+		this.wl_id = wl_id;
+		this.strWlId = nnsp.util.StringUtil.toNumFormat(wl_id);
+		if(wl_id == 0)
+			strWlId = null;
+	}
+	public String getStrWlId() {
+		return strWlId;
+	}
+	public int getWl_ngl_id() {
+		return wl_ngl_id;
+	}
+	public void setWl_ngl_id(int wl_ngl_id) {
+		this.wl_ngl_id = wl_ngl_id;
+	}
+	public String getWl_proto_id() {
+		return wl_proto_id;
+	}
+	public void setWl_proto_id(String wl_proto_id) {
+		this.wl_proto_id = wl_proto_id;
+	}
+	public String getWl_proto_sub_type() {
+		return wl_proto_sub_type;
+	}
+	public void setWl_proto_sub_type(String wl_proto_sub_type) {
+		this.wl_proto_sub_type = wl_proto_sub_type;
+	}
+	public String getWl_proto_sub_dec() {
+		return wl_proto_sub_dec;
+	}
+	public void setWl_proto_sub_dec(String wl_proto_sub_dec) {
+		this.wl_proto_sub_dec = wl_proto_sub_dec;
+	}
+	public String getWl_protocol_ics() {
+		return wl_proto_ics;
+	}
+	public void setWl_proto_ics(String wl_proto_ics) {
+		this.wl_proto_ics = wl_proto_ics;
+	}
+	public String getWl_proto_ics_type() {
+		return wl_proto_ics_type;
+	}
+	public void setWl_proto_ics_type(String wl_proto_ics_type) {
+		this.wl_proto_ics_type = wl_proto_ics_type;
+	}
+	public String getWl_proto_ics_cmd_type() {
+		return wl_proto_ics_cmd_type;
+	}
+	public void setWl_proto_ics_cmd_type(String wl_proto_ics_cmd_type) {
+		this.wl_proto_ics_cmd_type = wl_proto_ics_cmd_type;
+	}
+	public long getWl_length() {
+		return wl_length;
+	}
+	public void setWl_length(long wl_length) {
+		this.wl_length = wl_length;
+	}
+	public String getWl_dst_mac() {
+		return wl_dst_mac;
+	}
+	public void setWl_dst_mac(String wl_dst_mac) {
+		this.wl_dst_mac = wl_dst_mac;
+	}
+	public String getWl_src_mac() {
+		return wl_src_mac;
+	}
+	public void setWl_src_mac(String wl_src_mac) {
+		this.wl_src_mac = wl_src_mac;
+	}
+	public String getWl_ether_type() {
+		return wl_ether_type;
+	}
+	public void setWl_ether_type(String wl_ether_type) {
+		this.wl_ether_type = wl_ether_type;
+		if(wl_ether_type !=null){
+			if(wl_ether_type.equals("0608")){
+				this.wl_ether_type_dec = "ARP";
+			}
+			else if(wl_ether_type.equals("0008")){
+				this.wl_ether_type_dec = "IP Version 4";
+			}
+			else{
+				this.wl_ether_type_dec = wl_ether_type;
+			}
+		}
+	}
+	public String getWl_ether_type_dec() {
+		return wl_ether_type_dec;
+	}
+	public String getWl_dsap() {
+		return wl_dsap;
+	}
+	public void setWl_dsap(String wl_dsap) {
+		this.wl_dsap = wl_dsap;
+	}
+	public String getWl_ssap() {
+		return wl_ssap;
+	}
+	public void setWl_ssap(String wl_ssap) {
+		this.wl_ssap = wl_ssap;
+	}
+	public String getWl_organization() {
+		return wl_organization;
+	}
+	public void setWl_organization(String wl_organization) {
+		this.wl_organization = wl_organization;
+	}
+	public String getWl_src_host_type() {
+		return wl_src_host_type;
+	}
+	public void setWl_src_host_type(String wl_src_host_type) {
+		this.wl_src_host_type = wl_src_host_type;
+	}
+	public String getWl_dst_host_type() {
+		return wl_dst_host_type;
+	}
+	public void setWl_dst_host_type(String wl_dst_host_type) {
+		this.wl_dst_host_type = wl_dst_host_type;
+	}
+	public String getWl_src_ip() {
+		return wl_src_ip;
+	}
+	public void setWl_src_ip(String wl_src_ip) {
+		this.wl_src_ip = wl_src_ip;
+	}
+	public String getWl_dst_ip() {
+		return wl_dst_ip;
+	}
+	public void setWl_dst_ip(String wl_dst_ip) {
+		this.wl_dst_ip = wl_dst_ip;
+	}
+	public String getWl_src_eip() {
+		return wl_src_eip;
+	}
+	public void setWl_src_eip(String wl_src_eip) {
+		this.wl_src_eip = wl_src_eip;
+	}
+	public String getWl_dst_eip() {
+		return wl_dst_eip;
+	}
+	public void setWl_dst_eip(String wl_dst_eip) {
+		this.wl_dst_eip = wl_dst_eip;
+	}
+	public String getWl_src_port_type() {
+		return wl_src_port_type;
+	}
+	public void setWl_src_port_type(String wl_src_port_type) {
+		this.wl_src_port_type = wl_src_port_type;
+	}
+	public String getWl_dst_port_type() {
+		return wl_dst_port_type;
+	}
+	public void setWl_dst_port_type(String wl_dst_port_type) {
+		this.wl_dst_port_type = wl_dst_port_type;
+	}
+	public String getWl_src_port() {
+		return wl_src_port;
+	}
+	public void setWl_src_port(String wl_src_port) {
+		this.wl_src_port = wl_src_port;
+	}
+	public String getWl_dst_port() {
+		return wl_dst_port;
+	}
+	public void setWl_dst_port(String wl_dst_port) {
+		this.wl_dst_port = wl_dst_port;
+	}
+	public String getWl_func1() {
+		return wl_func1;
+	}
+	public void setWl_func1(String wl_func1) {
+		this.wl_func1 = wl_func1;
+	}
+	public String getWl_func2() {
+		return wl_func2;
+	}
+	public void setWl_func2(String wl_func2) {
+		this.wl_func2 = wl_func2;
+	}
+	public String getWl_func3() {
+		return wl_func3;
+	}
+	public void setWl_func3(String wl_func3) {
+		this.wl_func3 = wl_func3;
+	}
+	public String getWl_func4() {
+		return wl_func4;
+	}
+	public void setWl_func4(String wl_func4) {
+		this.wl_func4 = wl_func4;
+	}
+	public String getWl_func5() {
+		return wl_func5;
+	}
+	public void setWl_func5(String wl_func5) {
+		this.wl_func5 = wl_func5;
+	}
+	public String getWl_func6() {
+		return wl_func6;
+	}
+	public void setWl_func6(String wl_func6) {
+		this.wl_func6 = wl_func6;
+	}
+	public String getWl_func7() {
+		return wl_func7;
+	}
+	public void setWl_func7(String wl_func7) {
+		this.wl_func7 = wl_func7;
+	}
+	public String getWl_func8() {
+		return wl_func8;
+	}
+	public void setWl_func8(String wl_func8) {
+		this.wl_func8 = wl_func8;
+	}
+	public String getWl_func9() {
+		return wl_func9;
+	}
+	public void setWl_func9(String wl_func9) {
+		this.wl_func9 = wl_func9;
+	}
+	public String getWl_func10() {
+		return wl_func10;
+	}
+	public void setWl_func10(String wl_func10) {
+		this.wl_func10 = wl_func10;
+	}
+	public String getWl_func11() {
+		return wl_func11;
+	}
+	public void setWl_func11(String wl_func11) {
+		this.wl_func11 = wl_func11;
+	}
+	public String getWl_func12() {
+		return wl_func12;
+	}
+	public void setWl_func12(String wl_func12) {
+		this.wl_func12 = wl_func12;
+	}
+	public String getWl_func13() {
+		return wl_func13;
+	}
+	public void setWl_func13(String wl_func13) {
+		this.wl_func13 = wl_func13;
+	}
+	public String getWl_func14() {
+		return wl_func14;
+	}
+	public void setWl_func14(String wl_func14) {
+		this.wl_func14 = wl_func14;
+	}
+	public String getWl_list_sig() {
+		return wl_list_sig;
+	}
+	public void setWl_list_sig(String wl_list_sig) {
+		this.wl_list_sig = wl_list_sig;
+	}
+	public long getWl_payload_length() {
+		return wl_payload_length;
+	}
+	public void setWl_payload_length(long wl_payload_length) {
+		this.wl_payload_length = wl_payload_length;
+	}
+	public int getWl_flow() {
+		return wl_flow;
+	}
+	public void setWl_flow(int wl_flow) {
+		this.wl_flow = wl_flow;
+		if(wl_flow==1) {
+			this.wl_flow_txt="주기";
+		}
+		else if(wl_flow==2) {
+				this.wl_flow_txt="유사주기";
+		}
+		else {
+			this.wl_flow_txt="비주기";
+		}
+	}
+	public String getWl_flow_txt() {
+		return wl_flow_txt;
+	}
+	
+	public int getWl_standard() {
+		return wl_standard;
+	}
+	public void setWl_standard(int wl_standard) {
+		this.wl_standard = wl_standard;
+		if(wl_standard==1) {
+			this.wl_standard_txt="표준";
+		}
+		else {
+			this.wl_standard_txt="비표준";
+		}
+	}
+	public String getWl_standard_txt() {
+		return wl_standard_txt;
+	}
+	
+	public int getWl_avg_count() {
+		return wl_avg_count;
+	}
+	public void setWl_avg_count(int wl_avg_count) {
+		this.wl_avg_count = wl_avg_count;
+	}
+	public int getWl_count_min() {
+		return wl_count_min;
+	}
+	public void setWl_count_min(int wl_count_min) {
+		this.wl_count_min = wl_count_min;
+	}
+	public int getWl_use_yn() {
+		return wl_use_yn;
+	}
+	public void setWl_use_yn(int wl_use_yn) {
+		this.wl_use_yn = wl_use_yn;
+	}
+	public String getWl_regdttm() {
+		return wl_regdttm;
+	}
+	public void setWl_regdttm(String wl_regdttm) {
+		this.wl_regdttm = wl_regdttm;
+	}
+	public String getWl_sregdttm() {
+		return wl_sregdttm;
+	}
+	public void setWl_sregdttm(String wl_sregdttm) {
+		this.wl_sregdttm = wl_sregdttm;
+	}
+	public String getWl_eregdttm() {
+		return wl_eregdttm;
+	}
+	public void setWl_eregdttm(String wl_eregdttm) {
+		this.wl_eregdttm = wl_eregdttm;
+	}
+	
+	//Row Number
+	int rowNumber;
+	public int getRowNumber() {
+		return rowNumber;
+	}
+	public void setRowNumber(int rowNumber) {
+		this.rowNumber = rowNumber;
+	}
+}

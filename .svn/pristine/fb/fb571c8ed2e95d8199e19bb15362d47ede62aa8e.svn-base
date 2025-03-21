@@ -1,0 +1,27 @@
+# SEND
+nncCfg.divCode=1
+
+# RECEIVE
+#nncCfg.divCode=2
+
+#nncCfg.product.model=dual
+nncCfg.product.model=single
+
+nncCfg.common.pageRecord=20
+nncCfg.common.pageBlockSize=10
+
+# LOCAL
+#nncCfg.policy.sndPath=D:/conf/
+#nncCfg.policy.rcvPath=D:/conf/
+#nncCfg.policy.transPath=D:/snd-files/
+
+# SERVER
+nncCfg.policy.sndPath=/nnc-snd/system/conf/
+nncCfg.policy.rcvPath=/nnc-rcv/system/conf/
+nncCfg.policy.transPath=/nnc-snd/system/snd-files/
+
+
+# DB name
+db.ics=nnet_cds2
+tbl.packet.statistics=nnc_packet_stat_
+tbl.packet.statistics.no=8

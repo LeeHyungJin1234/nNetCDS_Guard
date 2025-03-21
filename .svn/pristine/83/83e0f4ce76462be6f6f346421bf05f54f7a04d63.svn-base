@@ -1,0 +1,17 @@
+jdbc.driverClassName=org.mariadb.jdbc.Driver
+#jdbc.url=jdbc:mariadb://200.200.100.90:3306/nnet_cds2?useUnicode=true&characterEncoding=utf8&restrictedAuth=client_ed25519
+#jdbc.url=jdbc:mariadb://127.0.0.1:3306/nnet_cds2?useUnicode=true&characterEncoding=utf8&restrictedAuth=client_ed25519
+jdbc.url=jdbc:mariadb://127.0.0.1:3307/nnet_cds2?useUnicode=true&characterEncoding=utf8&restrictedAuth=client_ed25519
+#jdbc.url=jdbc:mariadb://200.200.100.171:3306/nnet_cds2?useUnicode=true&characterEncoding=utf8&restrictedAuth=client_ed25519
+jdbc.username=nnsp
+jdbc.password=Nnsp!135!
+
+#jdbc.driverClassName=ENC(X2/pQHCNZhhNSn1Y7uuu3AVWbMn8rnpWXPxqbz0cGaArn1BwtpVEx6+zLuiQIQgQ)
+#jdbc.url=ENC(LjHsjWNq86WAQCcfhlkEZWjsOLc2j6tO3x7oQBJidMzSlNy3lirb3EVRLdr3Cdy2cPB8L5w7dh/BPRsugbsJ2g==)
+#jdbc.username=ENC(WgLQTOWWsHNsDFr1MxN/B5jBq2cSPoHfeMA1tCJMGSIM=)
+#jdbc.password=ENC(8l4DeEqXRVnZ0h16uhBNBWf0BKk/24X8a2chfyYLj6s=)
+
+#jdbc.driverClassName=com.mysql.jdbc.Driver
+#jdbc.url=jdbc:mysql://200.200.100.101:3306/nnet_diode3?useUnicode=true&characterEncoding=utf8
+#jdbc.username=nnsp
+#jdbc.password=nnsp_userdb

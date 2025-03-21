@@ -1,0 +1,27 @@
+package nnsp.common;
+
+import nnsp.services.NcAuditService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.security.core.session.SessionDestroyedEvent;
+import org.springframework.security.web.session.HttpSessionDestroyedEvent;
+
+public class SessionDestoryListener implements ApplicationListener<SessionDestroyedEvent> {
+
+	@Autowired
+	NcAuditService ncAuditService;
+
+	@Override
+	public void onApplicationEvent(SessionDestroyedEvent event) {
+		
+		if(((HttpSessionDestroyedEvent) event).getSession().getAttribute("loginUser") != null){
+			String user_id = (String) ((HttpSessionDestroyedEvent) event).getSession().getAttribute("loginUserId");
+			String client_ip = (String) ((HttpSessionDestroyedEvent) event).getSession().getAttribute("clientIp");
+			
+			ncAuditService.mng_log_insert(user_id,client_ip,"로그아웃",null,"S","I"); // 감사로그 저장
+			
+			((HttpSessionDestroyedEvent) event).getSession().invalidate(); // 세션 삭제
+		}
+	}
+}

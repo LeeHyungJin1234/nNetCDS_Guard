@@ -1,0 +1,49 @@
+.paging{
+	display:inline-block;
+	padding:0px;
+	margin:10px 0px 0px 0px;
+	border-radius:4px;
+}
+.paging>li{
+	display:inline;
+}
+.paging>li>a,.paging>li>span{
+	position:relative;
+	float:left;
+	padding:1px 7px 1px 7px;
+	margin-right:5px;
+	line-height:1.42857143;
+	font-size:14px;
+	font-family:'notokr-regular';
+	color:#676767;
+	text-decoration:none;
+	border-radius:5px;
+}
+.paging>li:first-child>a,.paging>li:first-child>span{
+	border-top-left-radius:5px;
+	border-bottom-left-radius:5px;
+}
+.paging>li:last-child>a,.paging>li:last-child>span{
+	margin-right:0px;
+	border-top-right-radius:5px;
+	border-bottom-right-radius:5px;
+}
+.paging>li>a:focus,.paging>li>a:hover,.paging>li>span:focus,.paging>li>span:hover{
+	z-index:2;
+	color:#676767;
+	background-color:#f1f0f0;
+	border-color:#f1f0f0;
+}
+.paging>.active>a,.paging>.active>a:focus,.paging>.active>a:hover,.paging>.active>span,.paging>.active>span:focus,.paging>.active>span:hover{
+	z-index:3;
+	color:#676767;
+	cursor:default;
+	background-color:#dcdbdb;
+	border-color:#dcdbdb;
+}
+.paging>.disabled>a,.paging>.disabled>a:focus,.paging>.disabled>a:hover,.paging>.disabled>span,.paging>.disabled>span:focus,.paging>.disabled>span:hover{
+	color:#676767;
+	cursor:not-allowed;
+	background-color:#f1f0f0;
+	border-color:#f1f0f0;
+}

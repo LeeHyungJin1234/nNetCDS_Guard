@@ -1,0 +1,328 @@
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sf" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<!DOCTYPE html>
+<html lang="ko" xml:lang="ko" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title><spring:message code='common.title'/></title>
+	<link rel="stylesheet" type="text/css" href="<c:url value="/css/bootstrap.min.css"/>">
+	<link rel="stylesheet" type="text/css" href="<c:url value="/css/font-awesome.min.css"/>">
+	<link rel="stylesheet" type="text/css" href="<c:url value="/css/nprogress.css"/>">
+	<link rel="stylesheet" type="text/css" href="<c:url value="/css/custom.min.css"/>">
+	<link rel="stylesheet" type="text/css" href="<c:url value="/css/login.css"/>">
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/js/rsa/jsbn.js"></script>
+	<script type="text/javascript" src="/js/rsa/rsa.js"></script>
+	<script type="text/javascript" src="/js/rsa/prng4.js"></script>
+	<script type="text/javascript" src="/js/rsa/rng.js"></script>
+
+	<!-- start csrf -->
+	<%@ include file="/WEB-INF/views/include/csrf.jsp"%>
+	<!-- csrf end -->
+
+  <script type="text/javascript">
+    $("header").remove();
+
+    $(document).ready(function () {
+    	if(typeof timeInterval !== 'undefined'){
+    		clearInterval(timeInterval);  
+        }
+		if(typeof alarmInterval !== 'undefined'){
+			clearInterval(alarmInterval);  
+		}
+		setTimeout(function () {
+			location.replace("/login.do");
+		}, <%= session.getMaxInactiveInterval() * 1000 - 5000 %>); 
+
+		document.getElementById("orig_passwd").addEventListener("keydown", pwKeyDownEventHandler);
+		document.getElementById("new_passwd").addEventListener("keydown", pwKeyDownEventHandler);
+		document.getElementById("new_passwd_confirm").addEventListener("keydown", pwKeyDownEventHandler);
+    });
+    
+  </script>
+  <script type="text/javascript">
+    function pwmodify() {
+      var id_check = /^[a-zA-Z0-9]*$/;
+      var id_flag;
+      var form = document.getElementById("passwdform");
+
+      if (form.orig_passwd.value.length < 1) {
+        alert("<spring:message code='login.curpwinput'/>");
+        return;
+      }
+      if (form.new_id.value.length < 1) {
+        alert("<spring:message code='login.newidinput'/>");
+        return;
+      } else {
+        var user_id222222 = '<%= (String)session.getAttribute("loginUserId")%>';
+        if (user_id222222 == form.new_id.value) {
+            alert("<spring:message code='login.sameid2'/>");
+            return;
+          }
+      }
+      if (!id_check.test(form.new_id.value)) {
+        alert("<spring:message code='login.newidcheck'/>");
+        return;
+      }
+      if (form.new_passwd.value.length < 1) {
+        alert("<spring:message code='login.newpwinput'/>");
+        return;
+      }
+      if (form.new_passwd_confirm.value.length < 1) {
+        alert("<spring:message code='login.newpwverifinput'/>");
+        return;
+      }
+      if (form.orig_passwd.value == form.new_passwd.value) {
+        alert("<spring:message code='login.newcursame'/>");
+        return;
+      }
+      if (form.new_passwd.value.length < 9) {
+        alert("<spring:message code='login.pwleast9'/>");
+        return;
+      }
+      if (form.new_passwd.value.length > 127) {
+        alert("<spring:message code='login.pwmost127'/>");
+        return;
+      }
+      var check = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{9,127}$/;
+      /* if (!check.test(form.new_passwd.value)) {
+        alert("<spring:message code='login.pwcombi'/>");
+        return;
+      } */
+      if (form.new_passwd.value != form.new_passwd_confirm.value) {
+        alert("<spring:message code='user.pwnotmatch'/>");
+        return;
+      }
+
+		if(confirm("<spring:message code='alert.change'/>") == true ){
+			pw_change();
+		}
+    }
+
+    function pw_change() {
+		var form = document.getElementById("passwdform");
+		
+		//RSA 암호화 생성
+		var rsa = new RSAKey();
+		rsa.setPublic(document.getElementById("RSAModulus").value, document.getElementById("RSAExponent").value);
+  	
+		document.passwdSubmit.orig_passwd.value = rsa.encrypt(form.orig_passwd.value);
+		document.passwdSubmit.new_passwd.value = rsa.encrypt(form.new_passwd.value);
+		document.passwdSubmit.new_passwd_confirm.value = rsa.encrypt(form.new_passwd_confirm.value);
+		document.passwdSubmit.new_id.value = rsa.encrypt(form.new_id.value);
+
+		form.orig_passwd.value=null;
+		form.orig_passwd.value=null;
+		form.orig_passwd.value=null;
+		form.new_passwd.value=null;
+		form.new_passwd.value=null;
+		form.new_passwd.value=null;
+		form.new_passwd_confirm.value=null;
+		form.new_passwd_confirm.value=null;
+		form.new_passwd_confirm.value=null;
+		
+		var formData = $("form[id=passwdSubmit]").serialize();
+		$.ajax({
+			type: "POST",
+			url: "passwd_change.do",
+			data: formData,
+			contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+			success: function (data) {
+				if (data == "true") {
+					alert("<spring:message code='login.loginagain'/>");
+					document.location.href='/logout.do';
+				}else if(data == "present"){
+					alert("<spring:message code='login.sameid2'/>");
+				}else if(data === "not_id64"){
+					alert("<spring:message code='user.idmin6max64'/>");
+				}else if (data === "not_allow") {
+					alert("<spring:message code='user.notuseid'/>");
+				} else if (data == "not_match_passwd") {
+					alert("<spring:message code='login.curpwnotmatch'/>");
+				} else if (data == "not_enough_length") {
+					alert("<spring:message code='login.least9more127'/>");
+				} else if (data == "not_origpw_length") {
+					alert("<spring:message code='login.curpwinput'/>");
+				} else if (data == "not_id_length") {
+					alert("<spring:message code='login.newidinput'/>");
+				} else if (data == "not_newpw_length") {
+					alert("<spring:message code='login.newpwinput'/>");
+				} else if (data == "not_pw_confirm") {
+					alert("<spring:message code='login.newpwverifinput'/>");
+				} else if (data == "not_same_pw") {
+					alert("<spring:message code='login.newcursame'/>");
+				} else if (data == "not_match_passwd") {
+					alert("<spring:message code='login.curpwnotmatch'/>");
+				} else if (data == "not_rule") {
+					alert("<spring:message code='user.pwin3'/>");
+				} else if (data == "not_enough_length") {
+					alert("<spring:message code='login.least9more127'/>");
+				} else if (data == "not_continuity") {
+					alert("<spring:message code='login.pwsamecont'/>");
+				} else if (data == "not_qwer") {
+					alert("<spring:message code='login.pwqwer'/>");
+				} else if (data == "not_id_pw") {
+				    alert("<spring:message code='user.idpw'/>");
+				} else if (data == "rsa_error") {
+					alert("<spring:message code='policy.tryagain'/>");
+					location.replace("/login.do?message=change_passwd");
+				   
+				} else {
+					alert('초기화 작업 중 에러가 발생하였습니다.');
+					document.location.href='/login.do';
+				}
+	        },
+	        error: function () {
+	        	alert('초기화 작업 중 에러가 발생하였습니다.');
+	        	document.location.href='/login.do';
+	        }
+		});
+	}
+
+    function id_verification(id) {
+      var flag = 0;
+      
+      $.ajax({
+        type: "POST",
+        url: "firstid_check.do",
+        async: false,
+        data: "nsu_id=" + id,
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        success: function (data) {
+          if (data == "present") {
+            //Present same ID's
+            flag = 1;
+          }
+        },
+        error: function () {
+          alert('아이디 적합성 체크 작업중 오류');
+        }
+      });
+      return flag;
+    }
+  </script>
+</head>
+<style>
+  body, html {
+    background: #f7f7f7;
+    height: 100%;
+  }
+
+  #prodHeader {
+    height: 178px;
+    line-height: 178px;
+    background-image: url('/images/top_bg.png');
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    text-align: center;
+  }
+
+  #prodFooter {
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    background: #fff;
+    text-align: right;
+    height: 50px;
+    line-height: 50px;
+    padding-right: 20px;
+  }
+  .item{display:inline-block;width:100%;}
+  .item > label{text-align:right;} 
+
+</style>
+<body>
+<!-- 자체팝업 시작 -->
+
+<body>
+<div id="prod">
+  <div id="prodHeader"><img src="<c:url value="/images/logo_v.png"/>" alt="nNetCDS V2.0 Guard"/></div>
+  <div class="col-md-12 col-sm-12 col-xs-12"
+       style="padding:25px 20px 10px 20px">
+    <div class="x_panel">
+      <div class="x_title">
+        <h2>계정 및 비밀번호 변경</h2>
+        <div class="clearfix"></div>
+      </div>
+      
+		<sf:form method="post" id="passwdSubmit" name="passwdSubmit" onsubmit="return false;">
+			<input type="hidden" name="csrf" value="${sessionScope.CSRF_TOKEN}"/>
+			<input type="hidden" name="orig_passwd"/>
+			<input type="hidden" name="new_id"/>
+			<input type="hidden" name="new_passwd"/>
+			<input type="hidden" name="new_passwd_confirm"/>
+		</sf:form>
+
+      <div class="x_content form-horizontal form-label-left">
+        <sf:form id="passwdform" class="form-horizontal form-label-left">
+			<input type="hidden" name="csrf" value="${sessionScope.CSRF_TOKEN}"/>
+			<input type="hidden" id="RSAModulus" value="${RSAModulus}" /><!-- 서버에서 전달한값을 셋팅한다. -->
+			<input type="hidden" id="RSAExponent" value="${RSAExponent}" /><!-- 서버에서 전달한값을 셋팅한다. -->
+          
+			<div class="item form-group">
+				<label class="control-label col-md-3 col-sm-3 col-xs-12">
+				  <spring:message code='login.currentpw'/>
+				</label>
+				<div class="col-md-6 col-sm-6 col-xs-12">
+				  <input type="password" id="orig_passwd" name="orig_passwd" class="form-control col-md-7 col-xs-12" autocomplete="off">
+				</div>
+			</div>
+			<div class="item form-group">
+				<label class="control-label col-md-3 col-sm-3 col-xs-12">
+				  <spring:message code='login.newid'/>
+				</label>
+				<div class="col-md-6 col-sm-6 col-xs-12">
+				  <input type="text" name="new_id" class="form-control col-md-7 col-xs-12" autocomplete="off">
+				</div>
+			</div>
+			
+			<div class="item form-group">
+				<label class="control-label col-md-3 col-sm-3 col-xs-12">
+				  <spring:message code='user.newpw'/>
+				</label>
+				<div class="col-md-6 col-sm-6 col-xs-12">
+				  <input type="password" name="new_passwd" id="new_passwd" class="form-control col-md-7 col-xs-12"autocomplete="off">
+				</div>
+			</div>
+			
+			<div class="item form-group">
+				<label class="control-label col-md-3 col-sm-3 col-xs-12">
+				  <spring:message code='login.newpwconfi'/>
+				</label>
+				<div class="col-md-6 col-sm-6 col-xs-12">
+				  <input type="password" name="new_passwd_confirm" id="new_passwd_confirm" class="form-control col-md-7 col-xs-12" autocomplete="off">
+				</div>
+			</div>
+
+        </sf:form>
+        <div class="ln_solid"></div>
+        <div class="form-group">
+        	<div class="col-md-3"></div>
+			<div class="col-md-6">
+				<button type="button" class="btn btn-danger" onClick="javascript:pwmodify();">
+					<i class="fa fa-pencil"></i>
+					등록
+				</button>
+			</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="prodFooter">nNetCDS V2.0 Guard ⓒ NNSP Corp.</div>
+</div>
+</body>
+
+
+
+
+<c:remove var="message"/>
+</body>
+</html>

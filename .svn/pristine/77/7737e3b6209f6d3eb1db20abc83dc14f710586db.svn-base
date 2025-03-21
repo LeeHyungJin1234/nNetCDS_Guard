@@ -1,0 +1,155 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"	pageEncoding="utf-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sf" uri="http://www.springframework.org/tags/form"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<!DOCTYPE html>
+<html xmlns="https://www.w3.org/1999/xhtml" lang="ko">
+<head>
+<meta charset="UTF-8">
+<title><spring:message code='common.title'/></title>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="author" content="nNetCDS">
+
+<link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css" />
+<%@ include file="/WEB-INF/views/include/css/reset_css.jsp"%>
+<link rel="stylesheet" href="/css/jquery-ui.css">
+<%@ include file="/WEB-INF/views/include/css/style_css.jsp"%>
+<%@ include file="/WEB-INF/views/include/css/policy2_css.jsp"%>
+<%@ include file="/WEB-INF/views/include/css/white_ics_css.jsp"%>
+<style>.switch{width:38px;height:21px;}.slider:before{height:17px;width:17px;}</style>
+
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/js/rsa/jsbn.js"></script>
+<script type="text/javascript" src="/js/rsa/rsa.js"></script>
+<script type="text/javascript" src="/js/rsa/prng4.js"></script>
+<script type="text/javascript" src="/js/rsa/rng.js"></script>
+
+<!-- <script type="text/javascript" src="/js/jquery.min.js"></script> -->
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$.ajaxSetup({ cache: false });//ajax 캐시 사용안함
+		var ngl_group_name = "${ngl_group_name}";
+		
+		$("#groupWhiteListContent").load("/group_list_grid.do?ngl_group_name="+encodeURIComponent(ngl_group_name));
+	});
+	
+	function openGroupForm() {
+		$("#groupFormPopup").fadeIn();
+		
+		document.getElementById("groupForm").ngl_group_name.value="";
+		document.getElementById("groupForm").ngl_group_desc.value="";
+	}
+	function closeGroupForm() {
+		$("#groupFormPopup").fadeOut();
+	}
+    function registerGroup(){
+    	var ip_check = /^((0|1[0-9]{0,2}|2[0-9]?|2[0-4][0-9]|25[0-5]|[3-9][0-9]?)\.){3}(1[0-9]{0,2}|2[0-9]?|2[0-4][0-9]|25[0-4]|[3-9][0-9]?)$/;
+        
+		var form = document.getElementById("groupForm"); 
+		
+		if(form.ngl_group_name.value == ""){
+			alert("그룹명을 입력하세요");
+			form.ngl_group_name.focus();
+			return false;
+		}
+		
+		if (confirm("그룹 정보를 등록 하시겠습니까?") == true) {
+			$.ajax({
+				url : "regst_group.do",
+				data :  $("#groupForm").serialize(), 
+				contentType : "application/x-www-form-urlencoded; charset=UTF-8",      
+				success: function(data) {
+					if(data == "success"){
+						alert("그룹 정보를 등록하였습니다.");
+						 location.href="/white_ics.do";
+					}
+					else if(data == "same_group"){
+						alert("이미 등록된 그룹 정보 입니다.")
+					}
+					else{
+						alert(data);
+					}
+				},
+				error: function(){
+					alert('등록 작업 중 에러가 발생하였습니다.');
+				}
+			});
+		}
+    }
+</script>
+</head>
+<body>
+	<!-- start header -->
+	<%@ include file="../include/top.jsp"%>
+	<!-- header end -->
+	
+	<section id="content">
+		<!-- left menu start -->
+		<%@ include file="../include/left.jsp"%>
+		<!-- left menu end -->
+		<div id="right-content">
+			<div class="btn_div">
+				<div class="policyBtn" onclick="openGroupForm()">
+					<i class="fa fa-upload" style="margin:0 5px 0 0;"></i>
+					<span>그룹 등록</span>
+				</div>
+				<div class="policyBtn" onclick="openWhiteForm()">
+					<i class="fa fa-upload" style="margin:0 5px 0 0;"></i>
+					<span>접근제어 정책 등록</span>
+				</div>
+				<div class="policyBtn deleteBtn" onclick="deleteWhiteList()">
+					<img class="deleteIcon" src="/img/delete.png">
+					<span>접근제어 정책 선택 삭제</span>
+				</div>
+			</div>
+			
+			<!-- ics list -->
+			<div id="ics_anomaly_list">
+				<!-- Tab list -->
+				<div class="witeBody">
+					<div id="groupWhiteListContent"></div>
+				</div>
+				<!-- /Tab list -->
+			</div>
+			<!-- /ics list -->
+			
+		</div>
+	</section>
+	
+	<%@ include file="../include/footer.jsp"%>
+	
+	<div id="groupFormPopup" class="popup" style="display:none;">
+		<div class="bg"></div>
+		<div class="pop-wrapper">
+			<div class="header_bar">
+				<h1>그룹 등록</h1>
+				<img src="/img/close.png" onclick="closeGroupForm()">
+			</div>
+			<form id="groupForm" class="registForm">
+				<ul>
+					<li>
+						<div class="li_label"><label for="ngl_group_name">그룹명</label></div>
+						<div class="li_input"><input class="frmTxt" type="text" name="ngl_group_name" id="ngl_group_name" value="" /></div>
+					</li>
+					<li>
+						<div class="li_label"><label for="ngl_group_desc">설명</label></div>
+						<div class="li_input"><input class="frmTxt" type="text" name="ngl_group_desc" id="ngl_group_desc" value="" /></div>
+					</li>
+				</ul>
+				<div class="btnDiv">
+					<div onclick="closeGroupForm()" class="cancelBtn"><img src="/img/cancel.png"><spring:message code='btn.cancel2'/></div>
+					<div onclick="registerGroup()" class="registBtn"><img src="/img/btnicon1.png"><spring:message code='btn.registration2'/></div>
+				</div>
+			</form>
+		</div>
+	</div>
+	
+	<%@ include file="whitePolicyPopup.jsp"%>
+</body>
+</html>

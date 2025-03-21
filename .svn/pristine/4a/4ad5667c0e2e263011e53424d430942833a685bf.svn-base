@@ -1,0 +1,28 @@
+.witeBody{
+	position: relative;
+	margin:20px 30px 20px 30px;
+}
+.whiteTab{  
+	font-size:0; width:100%;border-right: 2px solid white;border-bottom:1px solid #d5d6d7;margin-bottom:20px; 
+}
+.whiteTab > li{display: inline-block; height:32px; font-size:14px; width:130px; }
+.whiteTab > li a{
+	padding:0px 0px 1px 30px;margin:0px;border-radius: 4px 4px 0px 0px;
+	border-top:1px solid #d2d2d3;border-left:1px solid #d2d2d3;border-right:1px solid #d2d2d3;	
+	position:relative;font-family: 'Nanum Gothic'; display:block; height:33px; color: #010c1e;  
+	line-height:35px; text-decoration:none; font-size:14px;
+	background-color:#eeeded;
+}
+.whiteTab > li a.active{
+	padding:0px 0px 0px 30px;
+	border-bottom: 3.5px solid white;
+	border-top: 1px solid #d2d2d3; border-right: 1px solid #d2d2d3;border-left:1px solid #d2d2d3;border-right:1px solid #d2d2d3;
+    color:#cc1b3c; font-weight:bold;
+	background-color:#fff;
+}
+
+.linkNDR{
+	position:absolute;top:0px;left:290px;width:195px;height:33px;border-radius:16px;
+	line-height:33px;text-align:center;color:#fff;font-size:13px;
+	background-color:#7b8894;
+}

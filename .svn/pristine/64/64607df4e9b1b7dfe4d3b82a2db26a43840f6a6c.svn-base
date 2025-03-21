@@ -1,0 +1,14 @@
+## 2024-11-11 이형진
+ 1. 트래픽통계 > 그룹 선택 시 보안정책 페이지에서 해당그룹만 펼쳐지게 이동.
+   - tx_proc 및 rx_proc에 hit 기능 추가 및 sendGroupList(ngl_group_name) 기능 추가 
+   - rx_proc.do에서 model에 ngl_group_name과 ngl_id 추가 
+   - group_list_grid.do에 @RequestParam ngl_group_name 추가
+   - 수정 파일 : /views/stat/stat_traffic.jsp, /views/analyze/group_list_grid.jsp, 
+   			   nnsp.controllers.NcStatController.java, nnsp.controllers.NcWhController.java
+ 
+ 2. 트래픽통계 > 내부 또는 외부 통신현황의 전체 보기 클릭시 해당되는 구분값으로 필터링되어 통신현황 페이지로 이동.
+   - view_all_logs(ps_inout)에 ps_inout 파라미터 추가 및 id에 추가
+   - ics_anomaly_list_grid.do에 @RequestParam stat_ps_inout 추가
+   - ics_anomaly_list_grid.jsp에서 stat_ps_inout을 받아서 필터링 적용
+   - 수정 파일 : /views/stat/stat_traffic.jsp, /views/analyze/ics_anomaly_list_grid.jsp,
+			   nnsp.controllers.NcWhController.java

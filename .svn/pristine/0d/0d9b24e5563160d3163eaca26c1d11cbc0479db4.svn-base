@@ -1,0 +1,715 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="nnsp.xmlmappers.NcLogXmlMapper">
+
+	<select id="getMngSearchCnt" parameterType="map" resultType="int">
+		SELECT COUNT(*) 
+		FROM NNC_LOG_MNG 
+		WHERE 1=1 
+		<if test="nsu_id != null">
+			AND NSU_ID LIKE #{nsu_id}
+		</if>
+		<if test="nlm_create_sdate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+		</if>
+		<if test="nlm_create_edate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+		</if>
+		<if test="nai_ip != null">
+			AND NAI_IP LIKE #{nai_ip}
+		</if>
+		<if test="nlm_page != null">
+			AND NLM_PAGE LIKE #{nlm_page}
+		</if>
+		<if test="nlm_param != null">
+			AND NLM_PARAM LIKE #{nlm_param}
+		</if>
+		<if test="nlm_result != null">
+			AND NLM_RESULT = #{nlm_result}
+		</if>
+		<if test="nlm_risk_level != null">
+			AND NLM_RISK_LEVEL = #{nlm_risk_level}
+		</if>
+	</select>
+	
+	<select id="getMngSearchList" parameterType="map" resultType="NcLog">
+		SELECT NSU_ID, DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLM_CREATE_DATE, NAI_IP, NLM_PAGE, NLM_PARAM, 
+			(CASE NLM_RESULT WHEN 'L' THEN '계정잠김' WHEN 'S' THEN '성공' ELSE '실패' END) AS NLM_RESULT, (CASE NLM_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLM_RISK_LEVEL
+		FROM NNC_LOG_MNG 
+		WHERE 1=1
+		<if test="nsu_id != null">
+			AND NSU_ID LIKE #{nsu_id}
+		</if>
+		<if test="nlm_create_sdate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+		</if>
+		<if test="nlm_create_edate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+		</if>
+		<if test="nai_ip != null">
+			AND NAI_IP LIKE #{nai_ip}
+		</if>
+		<if test="nlm_page != null">
+			AND NLM_PAGE LIKE #{nlm_page}
+		</if>
+		<if test="nlm_param != null">
+			AND NLM_PARAM LIKE #{nlm_param}
+		</if>
+		<if test="nlm_result != null">
+			AND NLM_RESULT = #{nlm_result}
+		</if>
+		<if test="nlm_risk_level != null">
+			AND NLM_RISK_LEVEL = #{nlm_risk_level}
+		</if>
+		ORDER BY NLM_SEQ DESC
+		LIMIT #{page}, #{rowsPerPage}
+	</select>
+	
+	<select id="getMngCsv" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLM_SEQ ASC) AS RNW,
+			NSU_ID, DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLM_CREATE_DATE, NAI_IP, NLM_PAGE, NLM_PARAM,
+			(CASE NLM_RESULT WHEN 'L' THEN '계정잠김' WHEN 'S' THEN '성공' ELSE '실패' END) AS NLM_RESULT, 
+			(CASE NLM_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLM_RISK_LEVEL
+		FROM NNC_LOG_MNG 
+		WHERE 1=1
+		<if test="nlm_create_sdate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+		</if>
+		<if test="nlm_create_edate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+		</if>
+		ORDER BY NLM_CREATE_DATE DESC, NLM_SEQ DESC
+	</select>
+	
+	<select id="getMngSearchCnt_grid" parameterType="map" resultType="int">
+		SELECT COUNT(*) 
+		FROM NNC_LOG_MNG 
+		WHERE 1=1 
+		<if test="nlm_create_sdate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+		</if>
+		<if test="nlm_create_edate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+		</if>
+	</select>
+	
+	<select id="getMngSearchList_grid" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLM_CREATE_DATE ASC, NLM_SEQ ASC) AS NLM_INDEX,
+			NSU_ID, DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLM_CREATE_DATE, NAI_IP, NLM_PAGE, NLM_PARAM, 
+			(CASE NLM_RESULT WHEN 'L' THEN '계정잠김' WHEN 'S' THEN '성공' ELSE '실패' END) AS NLM_RESULT, 
+			(CASE NLM_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLM_RISK_LEVEL
+		FROM NNC_LOG_MNG 
+		WHERE 1=1
+		<if test="nlm_create_sdate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlm_create_sdate}
+		</if>
+		<if test="nlm_create_edate != null">
+			AND DATE_FORMAT(NLM_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlm_create_edate}
+		</if>
+		ORDER BY NLM_INDEX DESC
+	</select>
+	
+	<select id="getPolicySearchCnt" parameterType="map" resultType="int">
+		SELECT COUNT(*) 
+		FROM NNC_LOG_POLICY 
+		WHERE 1=1 
+		<if test="nsu_id != null">
+			AND NSU_ID LIKE #{nsu_id}
+		</if>
+		<if test="nlp_create_sdate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlp_create_sdate}
+		</if>
+		<if test="nlp_create_edate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlp_create_edate}
+		</if>
+		<if test="nai_ip != null">
+			AND NAI_IP LIKE #{nai_ip}
+		</if>
+		<if test="nlp_page != null">
+			AND NLP_PAGE LIKE #{nlp_page}
+		</if>
+		<if test="nlp_param != null">
+			AND NLP_PARAM LIKE #{nlp_param}
+		</if>
+		<if test="nlp_result != null">
+			AND NLP_RESULT = #{nlp_result}
+		</if>
+		<if test="nlp_risk_level != null">
+			AND NLP_RISK_LEVEL = #{nlp_risk_level}
+		</if>
+	</select>
+	
+	<select id="getPolicySearchList" parameterType="map" resultType="NcLog">
+		SELECT NSU_ID, DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLP_CREATE_DATE, NAI_IP, NLP_PAGE, NLP_PARAM, 
+			(CASE NLP_RESULT WHEN 'L' THEN '계정잠김' WHEN 'S' THEN '성공' ELSE '실패' END) AS NLP_RESULT, (CASE NLP_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLP_RISK_LEVEL
+		FROM NNC_LOG_POLICY 
+		WHERE 1=1
+		<if test="nsu_id != null">
+			AND NSU_ID LIKE #{nsu_id}
+		</if>
+		<if test="nlp_create_sdate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlp_create_sdate}
+		</if>
+		<if test="nlp_create_edate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlp_create_edate}
+		</if>
+		<if test="nai_ip != null">
+			AND NAI_IP LIKE #{nai_ip}
+		</if>
+		<if test="nlp_page != null">
+			AND NLP_PAGE LIKE #{nlp_page}
+		</if>
+		<if test="nlp_param != null">
+			AND NLP_PARAM LIKE #{nlp_param}
+		</if>
+		<if test="nlp_result != null">
+			AND NLP_RESULT = #{nlp_result}
+		</if>
+		<if test="nlp_risk_level != null">
+			AND NLP_RISK_LEVEL = #{nlp_risk_level}
+		</if>
+		ORDER BY NLP_SEQ DESC
+		LIMIT #{page}, #{rowsPerPage}
+	</select>
+	
+	<select id="getPolicyCsv" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLP_SEQ ASC) AS RNW,
+			NSU_ID, DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLP_CREATE_DATE, NAI_IP, NLP_PAGE, NLP_PARAM,
+			(CASE NLP_RESULT WHEN 'L' THEN '계정잠김' WHEN 'S' THEN '성공' ELSE '실패' END) AS NLP_RESULT,
+			(CASE NLP_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLP_RISK_LEVEL
+		FROM NNC_LOG_POLICY 
+		WHERE 1=1
+		<if test="nlp_create_sdate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlp_create_sdate}
+		</if>
+		<if test="nlp_create_edate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlp_create_edate}
+		</if>
+		ORDER BY NLP_CREATE_DATE DESC, NLP_SEQ DESC
+	</select>
+	
+	<select id="getPolicySearchCnt_grid" parameterType="map" resultType="int">
+		SELECT COUNT(*) 
+		FROM NNC_LOG_POLICY 
+		WHERE 1=1 
+		<if test="nlp_create_sdate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlp_create_sdate}
+		</if>
+		<if test="nlp_create_edate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlp_create_edate}
+		</if>
+	</select>
+	
+	<select id="getPolicySearchList_grid" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLP_CREATE_DATE ASC, NLP_SEQ ASC) AS NLP_INDEX,
+			NSU_ID, DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLP_CREATE_DATE, NAI_IP, NLP_PAGE, NLP_PARAM, 
+			(CASE NLP_RESULT WHEN 'L' THEN '계정잠김' WHEN 'S' THEN '성공' ELSE '실패' END) AS NLP_RESULT, 
+			(CASE NLP_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLP_RISK_LEVEL
+		FROM NNC_LOG_POLICY 
+		WHERE 1=1
+		<if test="nlp_create_sdate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlp_create_sdate}
+		</if>
+		<if test="nlp_create_edate != null">
+			AND DATE_FORMAT(NLP_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlp_create_edate}
+		</if>
+		ORDER BY NLP_INDEX DESC
+	</select>
+	
+	<select id="getEventSearchCnt" parameterType="map" resultType="int">
+		SELECT count(*) FROM NNC_LOG_EVENT NLE LEFT JOIN NNC_POLICY_LINK NPL ON (NLE.NLE_PROG_NAME = NPL.NPL_NO) 
+		<if test="nle_div == 1">
+			WHERE (NLE_DIV=1 OR NLE_DIV=2)
+		</if>
+		<if test="nle_div == 3">
+			WHERE (NLE_DIV=3 OR NLE_DIV=4)
+		</if>
+		<if test="nle_create_sdate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nle_create_sdate}
+		</if>
+		<if test="nle_create_edate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nle_create_edate}
+		</if>
+		<if test="nle_host_name != null">
+			AND NLE_HOST_NAME LIKE #{nle_host_name}
+		</if>
+		<if test="nle_risk_level != null">
+			AND NLE_RISK_LEVEL = #{nle_risk_level}
+		</if>
+		<if test="npl_name != null">
+			AND NPL_NAME LIKE #{npl_name}
+		</if>
+		<if test="nle_message != null">
+			AND NLE_MESSAGE LIKE #{nle_message}
+		</if>
+	</select>
+	
+	<select id="getEventSearchList" parameterType="map" resultType="NcLog">
+		SELECT DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLE_CREATE_DATE, NLE_HOST_NAME, 
+			(CASE NLE_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLE_RISK_LEVEL, NLE_PROG_NAME, NLE_MESSAGE, NPL_NAME
+		FROM NNC_LOG_EVENT NLE LEFT JOIN NNC_POLICY_LINK NPL ON (NLE.NLE_PROG_NAME = NPL.NPL_NO)
+		<if test="nle_div == 1">
+			WHERE (NLE_DIV=1 OR NLE_DIV=2)
+		</if>
+		<if test="nle_div == 3">
+			WHERE (NLE_DIV=3 OR NLE_DIV=4)
+		</if>
+		<if test="nle_create_sdate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nle_create_sdate}
+		</if>
+		<if test="nle_create_edate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nle_create_edate}
+		</if>
+		<if test="nle_host_name != null">
+			AND NLE_HOST_NAME LIKE #{nle_host_name}
+		</if>
+		<if test="nle_risk_level != null">
+			AND NLE_RISK_LEVEL = #{nle_risk_level}
+		</if>
+		<if test="npl_name != null">
+			AND NPL_NAME LIKE #{npl_name}
+		</if>
+		<if test="nle_message != null">
+			AND NLE_MESSAGE LIKE #{nle_message}
+		</if>
+		ORDER BY NLE_SEQ DESC
+		LIMIT #{page}, #{rowsPerPage}
+	</select>
+	
+	<select id="getEventCsv" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLE_CREATE_DATE ASC, NLE_SEQ ASC) AS RNW,
+			DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLE_CREATE_DATE, NLE_HOST_NAME, 
+			(CASE NLE_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLE_RISK_LEVEL, 
+			IFNULL(NPL_NAME, NLE_PROG_NAME) AS NPL_NAME, NLE_MESSAGE
+		FROM NNC_LOG_EVENT NLE LEFT JOIN NNC_POLICY_LINK NPL ON (NLE.NLE_PROG_NAME = NPL.NPL_NO)
+		WHERE 1=1 
+		<if test="nle_create_sdate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nle_create_sdate}
+		</if>
+		<if test="nle_create_edate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nle_create_edate}
+		</if>
+		ORDER BY NLE_CREATE_DATE DESC, NLE_SEQ DESC
+	</select>
+	
+	<select id="getAccessSearchCnt_grid" parameterType="map" resultType="int">
+		CALL nnet_cds2.getLogAccessGridTotalCnt(#{nla_create_sdate}, #{nla_create_edate})
+	</select>
+	
+	<select id="getAccessSearchList_grid" parameterType="map" resultType="NcLog">
+		CALL nnet_cds2.getLogAccessGridList(#{nla_create_sdate}, #{nla_create_edate})
+	</select>
+	<select id="getAccessCsv2" parameterType="map" resultType="NcLog">
+		CALL nnet_cds2.getLogaccessCsv(#{nla_create_sdate}, #{nla_create_edate})
+	</select>
+	
+	<select id="getEventSearchCnt_grid" parameterType="map" resultType="int">
+		SELECT count(*) FROM NNC_LOG_EVENT NLE LEFT JOIN NNC_POLICY_LINK NPL ON (NLE.NLE_PROG_NAME = NPL.NPL_NO)
+		WHERE 1=1 
+		<if test="nle_create_sdate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nle_create_sdate}
+		</if>
+		<if test="nle_create_edate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nle_create_edate}
+		</if>
+	</select>
+	
+	<select id="getEventSearchList_grid" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLE_CREATE_DATE ASC, NLE_SEQ ASC) AS NLE_INDEX,
+			DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLE_CREATE_DATE, NLE_HOST_NAME, 
+			(CASE NLE_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLE_RISK_LEVEL, 
+			IFNULL(NPL_NAME, NLE_PROG_NAME) AS NPL_NAME, NLE_MESSAGE
+		FROM NNC_LOG_EVENT NLE LEFT JOIN NNC_POLICY_LINK NPL ON (NLE.NLE_PROG_NAME = NPL.NPL_NO)
+		WHERE 1=1
+		<if test="nle_create_sdate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nle_create_sdate}
+		</if>
+		<if test="nle_create_edate != null">
+			AND DATE_FORMAT(NLE_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nle_create_edate}
+		</if>
+		ORDER BY NLE_SEQ DESC
+	</select>
+	
+	<select id="getAccessSearchCnt" parameterType="map" resultType="int">
+		SELECT count(*) FROM NNC_LOG_ACCESS 
+		<if test="nla_div == 1 and nla_div2 == null">
+			WHERE (NLA_DIV=1 OR NLA_DIV=2)
+		</if>
+		<if test="nla_div == 1 and nla_div2 eq 'S'.toString()">
+			WHERE NLA_DIV = 1
+		</if>
+		<if test="nla_div == 1 and nla_div2 eq 'R'.toString()">
+			WHERE NLA_DIV = 2
+		</if>
+		<if test="nla_div == 3 and nla_div2==null">
+			WHERE (NLA_DIV=3 OR NLA_DIV=4)
+		</if>
+		<if test="nla_div == 3 and nla_div2 eq 'S'.toString()">
+			WHERE NLA_DIV = 3
+		</if>
+		<if test="nla_div == 3 and nla_div2 eq 'R'.toString()">
+			WHERE NLA_DIV = 4
+		</if>
+		<if test="nla_create_sdate != null">
+			AND NLA_CREATE_DATE <![CDATA[>=]]> #{nla_create_sdate}
+		</if>
+		<if test="nla_create_edate != null">
+			AND NLA_CREATE_DATE <![CDATA[<=]]> #{nla_create_edate}
+		</if>
+		<if test="nla_host_name != null">
+			AND NLA_HOST_NAME LIKE #{nla_host_name}
+		</if>
+		<if test="nla_risk_level != null">
+			AND NLA_RISK_LEVEL = #{nla_risk_level}
+		</if>
+		<if test="nla_access_type != null">
+			AND NLA_ACCESS_TYPE = #{nla_access_type}
+		</if>
+		<if test="nla_src_ip != null">
+			AND NLA_SRC_IP LIKE #{nla_src_ip}
+		</if>
+		<if test="nla_dst_ip != null">
+			AND NLA_DST_IP LIKE #{nla_dst_ip}
+		</if>
+		<if test="nla_src_port != null">
+			AND NLA_SRC_PORT LIKE #{nla_src_port}
+		</if>
+		<if test="nla_dst_port != null">
+			AND NLA_DST_PORT LIKE #{nla_dst_port}
+		</if>
+		<if test="nla_protocol != null">
+			AND NLA_PROTOCOL LIKE #{nla_protocol}
+		</if>
+	</select>
+	
+	<select id="getAccessSearchList" parameterType="map" resultType="NcLog">
+		SELECT NLA_SEQ, DATE_FORMAT(NLA_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLA_CREATE_DATE, NLA_HOST_NAME, 
+			(CASE NLA_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLA_RISK_LEVEL, 
+			(CASE NLA_DIV WHEN 1 THEN '송신' WHEN 3 THEN '송신' ELSE '수신' END) AS NLA_DIV2, 
+			NLA_SRC_IP, NLA_DST_IP, NLA_SRC_PORT, NLA_DST_PORT, (CASE NLA_ACCESS_TYPE WHEN 0 THEN 'Allow' ELSE 'Deny' END) AS NLA_ACCESS_TYPE 
+		FROM NNC_LOG_ACCESS NLA
+		<if test="nla_div == 1 and nla_div2 == null">
+			WHERE (NLA_DIV=1 OR NLA_DIV=2)
+		</if>
+		<if test="nla_div == 1 and nla_div2 eq 'S'.toString()">
+			WHERE NLA_DIV = 1
+		</if>
+		<if test="nla_div == 1 and nla_div2 eq 'R'.toString()">
+			WHERE NLA_DIV = 2
+		</if>
+		<if test="nla_div == 3 and nla_div2==null">
+			WHERE (NLA_DIV=3 OR NLA_DIV=4)
+		</if>
+		<if test="nla_div == 3 and nla_div2 eq 'S'.toString()">
+			WHERE NLA_DIV = 3
+		</if>
+		<if test="nla_div == 3 and nla_div2 eq 'R'.toString()">
+			WHERE NLA_DIV = 4
+		</if>
+		<if test="nla_create_sdate != null">
+			AND NLA_CREATE_DATE <![CDATA[>=]]> #{nla_create_sdate}
+		</if>
+		<if test="nla_create_edate != null">
+			AND NLA_CREATE_DATE <![CDATA[<=]]> #{nla_create_edate}
+		</if>
+		<if test="nla_host_name != null">
+			AND NLA_HOST_NAME LIKE #{nla_host_name}
+		</if>
+		<if test="nla_risk_level != null">
+			AND NLA_RISK_LEVEL = #{nla_risk_level}
+		</if>
+		<if test="nla_access_type != null">
+			AND NLA_ACCESS_TYPE = #{nla_access_type}
+		</if>
+		<if test="nla_src_ip != null">
+			AND NLA_SRC_IP LIKE #{nla_src_ip}
+		</if>
+		<if test="nla_dst_ip != null">
+			AND NLA_DST_IP LIKE #{nla_dst_ip}
+		</if>
+		<if test="nla_src_port != null">
+			AND NLA_SRC_PORT LIKE #{nla_src_port}
+		</if>
+		<if test="nla_dst_port != null">
+			AND NLA_DST_PORT LIKE #{nla_dst_port}
+		</if>
+		<if test="nla_protocol != null">
+			AND NLA_PROTOCOL LIKE #{nla_protocol}
+		</if>
+		ORDER BY NLA_CREATE_DATE DESC
+		LIMIT #{page}, #{rowsPerPage}
+	</select>
+	
+	<select id="getIntegritySearchCnt" parameterType="map" resultType="int">
+		SELECT count(*) FROM NNC_LOG_INTEGRITY NLI LEFT JOIN NNC_POLICY_LINK NPL ON (NLI.NLI_PROG_NAME = NPL.NPL_NO) 
+		<if test="nli_div == 1">
+			WHERE (NLI_DIV=1 OR NLI_DIV=2)
+		</if>
+		<if test="nli_div == 3">
+			WHERE (NLI_DIV=3 OR NLI_DIV=4)
+		</if>
+		<if test="nli_create_sdate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nli_create_sdate}
+		</if>
+		<if test="nli_create_edate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nli_create_edate}
+		</if>
+		<if test="nli_host_name != null">
+			AND NLI_HOST_NAME LIKE #{nli_host_name}
+		</if>
+		<if test="nli_risk_level != null">
+			AND NLI_RISK_LEVEL = #{nli_risk_level}
+		</if>
+		<if test="npl_name != null">
+			AND NPL_NAME LIKE #{npl_name}
+		</if>
+		<if test="nli_message != null">
+			AND NLI_MESSAGE LIKE #{nli_message}
+		</if>
+	</select>
+	
+	<select id="getIntegritySearchList" parameterType="map" resultType="NcLog">
+		SELECT DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLI_CREATE_DATE, NLI_HOST_NAME, 
+			(CASE NLI_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLI_RISK_LEVEL, NLI_PROG_NAME, NLI_MESSAGE, NPL_NAME
+		FROM NNC_LOG_INTEGRITY NLI LEFT JOIN NNC_POLICY_LINK NPL ON (NLI.NLI_PROG_NAME = NPL.NPL_NO) 
+		<if test="nli_div == 1">
+			WHERE (NLI_DIV=1 OR NLI_DIV=2)
+		</if>
+		<if test="nli_div == 3">
+			WHERE (NLI_DIV=3 OR NLI_DIV=4)
+		</if>
+		<if test="nli_create_sdate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nli_create_sdate}
+		</if>
+		<if test="nli_create_edate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nli_create_edate}
+		</if>
+		<if test="nli_host_name != null">
+			AND NLI_HOST_NAME LIKE #{nli_host_name}
+		</if>
+		<if test="nli_risk_level != null">
+			AND NLI_RISK_LEVEL = #{nli_risk_level}
+		</if>
+		<if test="npl_name != null">
+			AND NPL_NAME LIKE #{npl_name}
+		</if>
+		<if test="nli_message != null">
+			AND NLI_MESSAGE LIKE #{nli_message}
+		</if>
+		ORDER BY NLI_SEQ DESC
+		LIMIT #{page}, #{rowsPerPage}
+	</select>
+	
+	<select id="getProtectionCsv" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLPT_CREATE_DATE ASC, NLPT_SEQ ASC) AS RNW,
+			DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLPT_CREATE_DATE, NLPT_HOST_NAME, 
+			(CASE NLPT_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLPT_RISK_LEVEL, 
+			NLPT_MESSAGE, IFNULL(NPL_NAME, NLPT_PROG_NAME) AS NPL_NAME
+		FROM NNC_LOG_PROTECTION NLPT 
+		LEFT JOIN NNC_POLICY_LINK NPL ON (NLPT.NLPT_PROG_NAME = NPL.NPL_NO)
+		WHERE 1=1
+		<if test="nlpt_create_sdate != null">
+			AND DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlpt_create_sdate}
+		</if>
+		<if test="nlpt_create_edate != null">
+			AND DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlpt_create_edate}
+		</if>
+		ORDER BY NLPT_CREATE_DATE DESC, NLPT_SEQ DESC
+	</select>
+	
+	<select id="getProtectionSearchCnt_grid" parameterType="map" resultType="int">
+		SELECT count(*) 
+		FROM NNC_LOG_PROTECTION NLPT LEFT 
+		JOIN NNC_POLICY_LINK NPL ON (NLPT.NLPT_PROG_NAME = NPL.NPL_NO)
+		WHERE 1=1 
+		<if test="nlpt_create_sdate != null">
+			AND DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlpt_create_sdate}
+		</if>
+		<if test="nlpt_create_edate != null">
+			AND DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlpt_create_edate}
+		</if>
+	</select>
+	
+	<select id="getProtectionSearchList_grid" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLPT_CREATE_DATE ASC, NLPT_SEQ ASC) AS NLPT_INDEX,
+			DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLPT_CREATE_DATE, NLPT_HOST_NAME, 
+			(CASE NLPT_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLPT_RISK_LEVEL, 
+			NLPT_MESSAGE, IFNULL(NPL_NAME, NLPT_PROG_NAME) AS NPL_NAME
+		FROM NNC_LOG_PROTECTION NLPT 
+		LEFT JOIN NNC_POLICY_LINK NPL ON (NLPT.NLPT_PROG_NAME = NPL.NPL_NO) 
+		WHERE 1=1 
+		<if test="nlpt_create_sdate != null">
+			AND DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nlpt_create_sdate}
+		</if>
+		<if test="nlpt_create_edate != null">
+			AND DATE_FORMAT(NLPT_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nlpt_create_edate}
+		</if>
+		ORDER BY NLPT_SEQ DESC
+	</select>
+	
+	<select id="getIntegrityCsv" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLI_CREATE_DATE ASC, NLI_SEQ ASC) AS RNW,
+			DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLI_CREATE_DATE, NLI_HOST_NAME, 
+			(CASE NLI_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLI_RISK_LEVEL, 
+			NLI_MESSAGE, IFNULL(NPL_NAME, NLI_PROG_NAME) AS NPL_NAME
+		FROM NNC_LOG_INTEGRITY NLI 
+		LEFT JOIN NNC_POLICY_LINK NPL ON (NLI.NLI_PROG_NAME = NPL.NPL_NO)
+		WHERE 1=1
+		<if test="nli_create_sdate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nli_create_sdate}
+		</if>
+		<if test="nli_create_edate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nli_create_edate}
+		</if>
+		ORDER BY NLI_CREATE_DATE DESC, NLI_SEQ DESC
+	</select>
+	
+	<select id="getIntegritySearchCnt_grid" parameterType="map" resultType="int">
+		SELECT count(*) 
+		FROM NNC_LOG_INTEGRITY NLI LEFT 
+		JOIN NNC_POLICY_LINK NPL ON (NLI.NLI_PROG_NAME = NPL.NPL_NO)
+		WHERE 1=1 
+		<if test="nli_create_sdate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nli_create_sdate}
+		</if>
+		<if test="nli_create_edate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nli_create_edate}
+		</if>
+	</select>
+	
+	<select id="getIntegritySearchList_grid" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLI_CREATE_DATE ASC, NLI_SEQ ASC) AS NLI_INDEX,
+			DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLI_CREATE_DATE, NLI_HOST_NAME, 
+			(CASE NLI_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLI_RISK_LEVEL, 
+			NLI_MESSAGE, IFNULL(NPL_NAME, NLI_PROG_NAME) AS NPL_NAME
+		FROM NNC_LOG_INTEGRITY NLI 
+		LEFT JOIN NNC_POLICY_LINK NPL ON (NLI.NLI_PROG_NAME = NPL.NPL_NO) 
+		WHERE 1=1 
+		<if test="nli_create_sdate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nli_create_sdate}
+		</if>
+		<if test="nli_create_edate != null">
+			AND DATE_FORMAT(NLI_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nli_create_edate}
+		</if>
+		ORDER BY NLI_SEQ DESC
+	</select>
+	
+	<select id="getErrorSearchCnt" parameterType="map" resultType="int">
+		SELECT count(*) FROM NNC_LOG_ERROR NLER LEFT JOIN NNC_CONF_PROGRAM NCP ON (NLER.NLER_PROG_NAME = NCP.NCP_FILE_NAME) 
+		<if test="nler_div == 1">
+			WHERE (NLER_DIV=1 OR NLER_DIV=2)
+		</if>
+		<if test="nler_div == 3">
+			WHERE (NLER_DIV=3 OR NLER_DIV=4)
+		</if>
+		<if test="nler_create_sdate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nler_create_sdate}
+		</if>
+		<if test="nler_create_edate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nler_create_edate}
+		</if>
+		<if test="nler_host_name != null">
+			AND NLER_HOST_NAME LIKE #{nler_host_name}
+		</if>
+		<if test="nler_risk_level != null">
+			AND NLER_RISK_LEVEL = #{nler_risk_level}
+		</if>
+		<if test="ncp_name != null">
+			AND NCP_NAME LIKE #{ncp_name}
+		</if>
+		<if test="nler_message != null">
+			AND NLER_MESSAGE LIKE #{nler_message}
+		</if>
+	</select>
+	
+	<select id="getErrorSearchList" parameterType="map" resultType="NcLog">
+		SELECT DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLER_CREATE_DATE, NLER_HOST_NAME, 
+			(CASE NLER_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLER_RISK_LEVEL, NLER_PROG_NAME, NLER_MESSAGE, NCP_NAME
+		FROM NNC_LOG_ERROR NLER LEFT JOIN NNC_CONF_PROGRAM NCP ON (NLER.NLER_PROG_NAME = NCP.NCP_FILE_NAME)
+		<if test="nler_div == 1">
+			WHERE (NLER_DIV=1 OR NLER_DIV=2)
+		</if>
+		<if test="nler_div == 3">
+			WHERE (NLER_DIV=3 OR NLER_DIV=4)
+		</if>
+		<if test="nler_create_sdate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nler_create_sdate}
+		</if>
+		<if test="nler_create_edate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nler_create_edate}
+		</if>
+		<if test="nler_host_name != null">
+			AND NLER_HOST_NAME LIKE #{nler_host_name}
+		</if>
+		<if test="nler_risk_level != null">
+			AND NLER_RISK_LEVEL = #{nler_risk_level}
+		</if>
+		<if test="ncp_name != null">
+			AND NCP_NAME LIKE #{ncp_name}
+		</if>
+		<if test="nler_message != null">
+			AND NLER_MESSAGE LIKE #{nler_message}
+		</if>
+		ORDER BY NLER_SEQ DESC
+		LIMIT #{page}, #{rowsPerPage}
+	</select>
+	
+	<select id="getErrorCsv" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLER_CREATE_DATE ASC, NLER_SEQ ASC) AS RNW,
+			DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLER_CREATE_DATE, NLER_HOST_NAME, 
+			(CASE NLER_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLER_RISK_LEVEL, 
+			IFNULL(NCP_NAME, NLER_PROG_NAME) AS NCP_NAME, NLER_MESSAGE
+		FROM NNC_LOG_ERROR NLER 
+		LEFT JOIN NNC_CONF_PROGRAM NCP ON (NLER.NLER_PROG_NAME = NCP.NCP_FILE_NAME) 
+		WHERE 1=1
+		<if test="nler_create_sdate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nler_create_sdate}
+		</if>
+		<if test="nler_create_edate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nler_create_edate}
+		</if>
+		
+		ORDER BY NLER_CREATE_DATE DESC, NLER_SEQ DESC
+	</select>
+	
+	<select id="getErrorSearchCnt_grid" parameterType="map" resultType="int">
+		SELECT count(*) 
+		FROM NNC_LOG_ERROR NLER 
+		LEFT JOIN NNC_CONF_PROGRAM NCP ON (NLER.NLER_PROG_NAME = NCP.NCP_FILE_NAME) 
+		WHERE 1=1 
+		<if test="nler_create_sdate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nler_create_sdate}
+		</if>
+		<if test="nler_create_edate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nler_create_edate}
+		</if>
+	</select>
+	
+	<select id="getErrorSearchList_grid" parameterType="map" resultType="NcLog">
+		SELECT ROW_NUMBER() OVER(ORDER BY NLER_CREATE_DATE ASC, NLER_SEQ ASC) AS NLER_INDEX,
+			DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d %H:%i:%s') NLER_CREATE_DATE, NLER_HOST_NAME, 
+			(CASE NLER_RISK_LEVEL WHEN 'I' THEN '정보' WHEN 'R' THEN '위험' ELSE '경고' END) AS NLER_RISK_LEVEL, 
+			IFNULL(NCP_NAME, NLER_PROG_NAME) AS NCP_NAME, NLER_MESSAGE
+		FROM NNC_LOG_ERROR NLER 
+		LEFT JOIN NNC_CONF_PROGRAM NCP ON (NLER.NLER_PROG_NAME = NCP.NCP_FILE_NAME) 
+		WHERE 1=1 
+		<if test="nler_create_sdate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[>=]]> #{nler_create_sdate}
+		</if>
+		<if test="nler_create_edate != null">
+			AND DATE_FORMAT(NLER_CREATE_DATE,'%Y-%m-%d') <![CDATA[<=]]> #{nler_create_edate}
+		</if>
+		ORDER BY NLER_SEQ DESC
+	</select>
+	
+	
+	<select id="getAccessSearchCnt2" parameterType="map" resultType="int">
+		CALL nnet_cds2.getLogaccessTotal(#{nla_create_sdate}, #{nla_create_edate}, #{nla_div},  #{nla_div2}, #{nla_host_name}, #{nla_risk_level}, #{nla_access_type}, #{nla_src_ip}, #{nla_dst_ip}, #{nla_src_port}, #{nla_dst_port}, #{nla_protocol})
+	</select>
+	
+	<select id="getAccessSearchList2" parameterType="map" resultType="NcLog">
+		CALL nnet_cds2.getLogaccessDate(#{nla_create_sdate}, #{nla_create_edate}, 1, #{page}, #{rowsPerPage}, #{nla_div}, #{nla_div2}, #{nla_host_name}, #{nla_risk_level}, #{nla_access_type}, #{nla_src_ip}, #{nla_dst_ip}, #{nla_src_port}, #{nla_dst_port}, #{nla_protocol})
+	</select>
+</mapper>

@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="nnsp.xmlmappers.NcWhXmlMapper">	
+	<select id="getPacketList_grid" parameterType="map" resultType="NdrPs">
+<!-- 		SELECT  -->
+<!-- 			PS_ID -->
+<!-- 			,PS_STRC_TIME -->
+<!-- 			,PS_PROTO_ID -->
+<!-- 			,PS_PROTO_SUB_DEC -->
+<!-- 			,PS_SRC_IP -->
+<!-- 			,PS_DST_IP -->
+<!-- 			,PS_SRC_PORT -->
+<!-- 			,PS_DST_PORT -->
+<!-- 			,PS_INOUT -->
+<!-- 			,PS_DETECT -->
+<!-- 			,PS_DETECT_DESC -->
+<!-- 			,PS_NGL_ID -->
+<!-- 		FROM nnet_cds2.nnc_packet_stat_#{ps_table} ps -->
+<!-- 		WHERE PS_STRC_TIME <![CDATA[>=]]> #{ps_stime} -->
+<!-- 		AND PS_STRC_TIME <![CDATA[<=]]> #{ps_etime} -->
+<!-- 		ORDER BY PS_STRC_TIME DESC -->
+<!-- 		LIMIT 5000 -->
+			SELECT 
+				PS_ID
+				,PS_STRC_TIME
+				,PS_PROTO_ID
+				,PS_PROTO_SUB_DEC
+				,PS_SRC_IP
+				,PS_DST_IP
+				,PS_SRC_PORT
+				,PS_DST_PORT
+				,PS_INOUT
+				,PS_DETECT
+				,PS_DETECT_DESC
+				,PS_NGL_ID
+				,IFNULL((SELECT NGL_GROUP_NAME FROM nnc_group_list ngl WHERE ngl.NGL_ID = ps.PS_NGL_ID), "UNKNOWN") NGL_GROUP_NAME
+			FROM nnet_cds2.nnc_packet_stat_#{ps_table} ps
+			WHERE PS_STRC_TIME <![CDATA[>=]]> #{ps_stime} 
+			AND PS_STRC_TIME <![CDATA[<=]]> #{ps_etime} 
+			ORDER BY PS_STRC_TIME DESC
+			LIMIT 5000
+	</select>
+	
+	<select id="getPacketStatList" parameterType="map" resultType="NdrPs">
+		CALL nnet_cds2.getPacketStatList(#{ps_stime}, #{ps_etime}, #{filter}, #{sort}, #{skip}, #{take})
+	</select>
+	
+	<select id="getPacketStatTotalCount" parameterType="NdrPs" resultType="int">
+		CALL nnet_cds2.getPacketStatTotalCount(#{ps_stime}, #{ps_etime}, #{filter})
+	</select>
+	
+	<select id="getWhList_grid" parameterType="map" resultType="NcWhList">
+		SELECT * FROM nnet_cds2.nnc_wh_list_sig 
+		ORDER BY WL_REGDTTM DESC, WL_ID DESC
+	</select>
+	
+	<select id="getWhList" parameterType="map" resultType="NcWhList">
+		SELECT WL_ID
+		      ,WL_PROTO_ID
+		      ,WL_PROTO_SUB_TYPE
+		      ,WL_PROTO_SUB_DEC
+		      ,WL_PROTO_ICS
+		      ,WL_PROTO_ICS_TYPE
+		      ,WL_PROTO_ICS_CMD_TYPE
+		      ,WL_LENGTH
+		      ,WL_ETHER_TYPE
+		      ,WL_DSAP
+		      ,WL_SSAP
+		      ,WL_ORGANIZATION
+		      ,WL_SRC_IP
+		      ,WL_DST_IP
+		      ,WL_SRC_PORT
+		      ,WL_DST_PORT
+		      ,WL_SRC_MAC
+		      ,WL_DST_MAC
+		      ,WL_LIST_SIG
+		      ,WL_PAYLOAD_LENGTH
+		      ,WL_FLOW
+		      ,WL_STANDARD
+		      ,WL_AVG_COUNT
+		      ,WL_COUNT_MIN
+		      ,WL_USE_YN
+		      ,WL_REGDTTM
+		      ,PS_INOUT
+		FROM nnet_cds2.nnc_wh_list_sig
+		WHERE 1=1
+		<if test="wl_id != null">
+			AND WL_ID = #{wl_id} 
+		</if>
+		<if test="wl_sregdttm != null">
+			AND DATE_FORMAT(WL_REGDTTM,'%Y-%m-%d') <![CDATA[>=]]> #{wl_sregdttm} 
+		</if>
+		<if test="wl_eregdttm != null">
+			AND DATE_FORMAT(WL_REGDTTM,'%Y-%m-%d') <![CDATA[<=]]> #{wl_eregdttm} 
+		</if>
+		<if test="wl_proto_sub_dec != null">
+			AND WL_PROTO_SUB_DEC LIKE #{wl_proto_sub_dec}
+		</if>
+		<if test="wl_proto_id != null">
+			AND WL_PROTO_ID = #{wl_proto_id}
+		</if>
+		<if test="wl_protocol_sub_id != null">
+			AND WL_PROTOCOL_SUB_ID = #{wl_protocol_sub_id}
+		</if>
+		<if test="wl_dst_mac != null">
+			AND WL_DST_MAC LIKE #{wl_dst_mac}
+		</if>
+		<if test="wl_src_mac != null">
+			AND WL_SRC_MAC LIKE #{wl_src_mac}
+		</if>
+		<if test="wl_src_ip != null">
+			AND WL_SRC_IP LIKE #{wl_src_ip}
+		</if>
+		<if test="wl_dst_ip != null">
+			AND WL_DST_IP LIKE #{wl_dst_ip}
+		</if>
+		<if test="wl_src_port != null">
+			AND WL_SRC_PORT = #{wl_src_port}
+		</if>
+		<if test="wl_dst_port != null">
+			AND WL_DST_PORT = #{wl_dst_port}
+		</if>
+		<if test="wl_list_sig != null">
+			AND WL_LIST_SIG = #{wl_list_sig}
+		</if>
+		order by WL_REGDTTM DESC, WL_ID DESC
+		LIMIT #{page}, #{rowsPerPage}
+	</select>
+	
+	<select id="getWhCnt_grid" parameterType="map" resultType="int">
+		SELECT COUNT(*) CNT
+		FROM nnet_cds2.nnc_wh_list_sig
+	</select>
+	
+	<select id="getWhCnt" parameterType="map" resultType="int">
+		SELECT COUNT(*) CNT
+		FROM nnet_cds2.nnc_wh_list_sig
+		WHERE 1=1
+		<if test="wl_sregdttm != null">
+			AND DATE_FORMAT(WL_REGDTTM,'%Y-%m-%d') <![CDATA[>=]]> #{wl_sregdttm} 
+		</if>
+		<if test="wl_eregdttm != null">
+			AND DATE_FORMAT(WL_REGDTTM,'%Y-%m-%d') <![CDATA[<=]]> #{wl_eregdttm} 
+		</if>
+		<if test="wl_proto_sub_dec != null">
+			AND WL_PROTO_SUB_DEC LIKE #{wl_proto_sub_dec}
+		</if>
+		<if test="wl_proto_id != null">
+			AND WL_PROTO_ID = #{wl_proto_id}
+		</if>
+		<if test="wl_protocol_sub_id != null">
+			AND WL_PROTOCOL_SUB_ID = #{wl_protocol_sub_id}
+		</if>
+		<if test="wl_length != null">
+			AND WL_LENGTH = #{wl_length}
+		</if>
+		<if test="wl_dst_mac != null">
+			AND WL_DST_MAC LIKE #{wl_dst_mac}
+		</if>
+		<if test="wl_src_mac != null">
+			AND WL_SRC_MAC LIKE #{wl_src_mac}
+		</if>
+		<if test="wl_dsap != null">
+			AND WL_DSAP = #{wl_dsap}
+		</if>
+		<if test="wl_ssap != null">
+			AND WL_SSAP = #{wl_ssap}
+		</if>
+		<if test="wl_org_code != null">
+			AND WL_ORG_CODE = #{wl_org_code}
+		</if>
+		<if test="wl_src_ip != null">
+			AND WL_SRC_IP LIKE #{wl_src_ip}
+		</if>
+		<if test="wl_dst_ip != null">
+			AND WL_DST_IP LIKE #{wl_dst_ip}
+		</if>
+		<if test="wl_src_port != null">
+			AND WL_SRC_PORT = #{wl_src_port}
+		</if>
+		<if test="wl_dst_port != null">
+			AND WL_DST_PORT = #{wl_dst_port}
+		</if>
+		<if test="wl_use_yn != null">
+			AND WL_USE_YN = #{wl_use_yn}
+		</if>
+		<if test="wl_list_sig != null">
+			AND WL_LIST_SIG = #{wl_list_sig}
+		</if>
+	</select>
+	
+	<select id="getWhRuleCnt" parameterType="map" resultType="int">
+		SELECT COUNT(*) CNT
+		FROM nnet_cds2.nnc_wh_list_sig wl, nnet_cds2.nnc_packet_stat_#{ps_table} ps 
+		WHERE ps.PS_ID = #{ps_id} 
+		AND wl.WL_PROTO_SUB_DEC = ps.PS_PROTO_SUB_DEC 
+		AND wl.PS_INOUT = ps.PS_INOUT
+		AND wl.WL_SRC_IP = ps.PS_SRC_IP
+		AND wl.WL_SRC_PORT = ps.PS_SRC_PORT
+		AND wl.WL_DST_IP = ps.PS_DST_IP
+		AND wl.WL_DST_PORT = ps.PS_DST_PORT
+	</select>
+	
+	<insert id="insertWhProcInfo" parameterType="map">
+		INSERT INTO nnet_cds2.nnc_wh_list_sig
+		(
+			WL_PROTO_ID
+			,WL_PROTO_SUB_TYPE
+			,WL_PROTO_SUB_DEC
+			,WL_PROTO_ICS
+			,WL_PROTO_ICS_TYPE
+			,WL_PROTO_ICS_CMD_TYPE
+			,WL_SRC_MAC
+			,WL_DST_MAC
+			,WL_ETHER_TYPE
+			,WL_DSAP
+			,WL_SSAP
+			,WL_ORGANIZATION
+			,WL_SRC_IP
+			,WL_DST_IP
+			,WL_SRC_PORT
+			,WL_DST_PORT
+			,WL_Func1
+			,WL_Func2
+			,WL_Func3
+			,WL_Func4
+			,WL_Func5
+			,WL_Func6
+			,WL_Func7
+			,WL_Func8
+			,WL_Func9
+			,WL_Func10
+			,WL_Func11
+			,WL_Func12
+			,WL_Func13
+			,WL_Func14
+			,WL_LIST_SIG
+			,WL_PAYLOAD_LENGTH
+			,WL_LENGTH
+		    ,WL_USE_YN
+			,WL_REGDTTM
+			,PS_INOUT
+		)
+		SELECT 
+			PS_PROTO_ID
+			,PS_PROTO_SUB_TYPE
+			,PS_PROTO_SUB_DEC
+			,PS_PROTO_ICS
+			,PS_PROTO_ICS_TYPE
+			,PS_PROTO_ICS_CMD_TYPE
+			,PS_SRC_MAC
+			,PS_DST_MAC
+			,PS_ETHER_TYPE
+			,PS_DSAP
+			,PS_SSAP
+			,PS_ORGANIZATION
+			,PS_SRC_IP
+			,PS_DST_IP
+			,PS_SRC_PORT
+			,PS_DST_PORT
+			,PS_ICS_HEADER1
+			,PS_ICS_HEADER2
+			,PS_ICS_HEADER3
+			,PS_ICS_HEADER4
+			,PS_ICS_HEADER5
+			,PS_ICS_HEADER6
+			,PS_ICS_HEADER7
+			,PS_ICS_HEADER8
+			,PS_ICS_HEADER9
+			,PS_ICS_HEADER10
+			,PS_ICS_HEADER11
+			,PS_ICS_HEADER12
+			,PS_ICS_HEADER13
+			,PS_ICS_HEADER14
+			,PS_WHITE_RULE
+			,PS_PAYLOAD_SIZE
+			,(CASE WHEN PS_BYTES>0 AND PS_PACKETS>0 THEN (PS_BYTES/PS_PACKETS) ELSE 0 END)
+			,0
+			,now() 
+			,PS_INOUT
+		FROM nnet_cds2.nnc_packet_stat_#{ps_table}
+		WHERE PS_ID = #{ps_id}
+		
+	</insert>
+	<insert id="insertWhiteList" parameterType="map">
+		INSERT INTO nnet_cds2.nnc_wh_list_sig
+		(
+			WL_PROTO_SUB_DEC
+			,WL_SRC_IP
+			,WL_DST_IP
+			,WL_SRC_PORT
+			,WL_DST_PORT
+			,WL_Func1
+			,WL_Func2
+			,WL_Func3
+			,WL_Func4
+		    ,WL_USE_YN
+			,WL_REGDTTM
+		)
+		VALUES(
+			#{wl_proto_sub_dec}
+			,#{wl_src_ip}
+			,#{wl_dst_ip}
+			,#{wl_src_port}
+			,#{wl_dst_port}
+			,#{wl_func1}
+			,#{wl_func2}
+			,#{wl_func3}
+			,#{wl_func4}
+			,#{wl_use_yn}
+			,now()
+		)
+	</insert>
+	<delete id="delWhProcInfo" parameterType="map">
+		DELETE FROM nnet_cds2.nnc_wh_list_sig
+		WHERE WL_LIST_SIG = #{wl_list_sig}
+	</delete>
+	<delete id="delWhId" parameterType="map">
+		DELETE FROM nnet_cds2.nnc_wh_list_sig
+		WHERE WL_ID = #{wl_id}
+	</delete>
+	<update id="updateWhiteUseYN" parameterType="map">
+		UPDATE nnet_cds2.nnc_wh_list_sig SET WL_USE_YN= #{wl_use_yn}
+		WHERE WL_ID = #{wl_id}
+	</update>
+	
+	
+	<insert id="registerGroupList" parameterType="map">
+		INSERT INTO nnet_cds2.nnc_group_list
+		(
+			NGL_GROUP_NAME
+			,NGL_GROUP_DESC
+		)
+		VALUES(
+			#{ngl_group_name}
+			,#{ngl_group_desc}
+		)
+	</insert>
+	<insert id="registerWhiteList" parameterType="map">
+		INSERT INTO nnet_cds2.nnc_wh_list_sig
+		(
+			WL_NGL_ID
+			,WL_PROTO_SUB_DEC
+			,PS_INOUT
+			,WL_SRC_HOST_TYPE
+			,WL_SRC_IP
+			,WL_SRC_EIP
+			,WL_SRC_PORT_TYPE
+			,WL_SRC_PORT
+			,WL_DST_HOST_TYPE
+			,WL_DST_IP
+			,WL_DST_EIP
+			,WL_DST_PORT_TYPE
+			,WL_DST_PORT
+			,WL_REGDTTM
+		)
+		VALUES(
+			#{wl_ngl_id}
+			,#{wl_proto_sub_dec}
+			,#{ps_inout}
+			,#{wl_src_host_type}
+			,#{wl_src_ip}
+			,#{wl_src_eip}
+			,#{wl_src_port_type}
+			,#{wl_src_port}
+			,#{wl_dst_host_type}
+			,#{wl_dst_ip}
+			,#{wl_dst_eip}
+			,#{wl_dst_port_type}
+			,#{wl_dst_port}
+			,now()
+		)
+	</insert>
+	
+<!--  	<select id="selectGroupListCnt" parameterType="map" resultType="int"> -->
+<!-- 		SELECT COUNT(*) CNT FROM nnet_cds2.nnc_group_list  -->
+<!-- 		WHERE 1=1 -->
+<!-- 		<if test="ngl_group_name != null"> -->
+<!-- 			AND BINARY(NGL_GROUP_NAME) = #{ngl_group_name} -->
+<!-- 		</if> -->
+<!-- 	</select> -->
+	
+	<select id="selectGroupList" parameterType="map" resultType="NcWhList">
+		SELECT * FROM nnet_cds2.nnc_group_list 
+		WHERE 1=1
+		<if test="ngl_id != null">
+			AND NGL_ID = #{ngl_id}
+		</if>
+	</select>
+	
+	<select id="selectGroupInfo" parameterType="map" resultType="NcWhList">
+		SELECT * FROM nnet_cds2.nnc_group_list 
+		WHERE NGL_ID = #{ngl_id}
+	</select>
+	
+	<select id="selectLastGroupList" resultType="NcWhList">
+		SELECT * FROM nnet_cds2.nnc_group_list 
+		WHERE NGL_ID = (SELECT max(NGL_ID) FROM nnet_cds2.nnc_group_list);
+	</select>
+	
+	<select id="selectGroupWhiteList" parameterType="map" resultType="NcWhList">
+		CALL nnet_cds2.getGroupList(#{filter}, #{sort}, #{skip}, #{take})
+	</select>
+	
+	<select id="getGroupWhiteListCount" parameterType="map" resultType="int">
+		CALL nnet_cds2.getGroupTotalCount(#{filter})
+	</select>
+	
+	<select id="selectIsDuplicateWhiteList" parameterType="map" resultType="int">
+		SELECT COUNT(*) CNT FROM nnet_cds2.nnc_wh_list_sig  
+		WHERE 1=1
+		<if test="wl_proto_sub_dec != null">
+			AND WL_PROTO_SUB_DEC = #{wl_proto_sub_dec}
+		</if>
+		<if test="ps_inout != null">
+			AND PS_INOUT = #{ps_inout}
+		</if>
+		<if test="wl_src_ip != null">
+			AND WL_SRC_IP = #{wl_src_ip}
+		</if>
+		<if test="wl_src_port != null">
+			AND WL_SRC_PORT = #{wl_src_port}
+		</if>
+		<if test="wl_dst_ip != null">
+			AND WL_DST_IP = #{wl_dst_ip}
+		</if>
+		<if test="wl_dst_port != null">
+			AND WL_DST_PORT = #{wl_dst_port}
+		</if>
+	</select>
+	
+	<select id="selectPacketStatByPsId" parameterType="map" resultType="NdrPs">
+		SELECT * FROM nnet_cds2.nnc_packet_stat_#{tblDate}
+		WHERE PS_ID = #{ps_id}
+	</select>
+	
+	<select id="selectWhiteListByGroupName" parameterType="map" resultType="NcWhList">
+		SELECT * FROM nnet_cds2.nnc_group_list 
+		WHERE NGL_GROUP_NAME = #{ngl_group_name}
+	</select>
+	
+	<delete id="deleteWhiteList">
+		DELETE FROM nnet_cds2.nnc_wh_list_sig
+		WHERE WL_NGL_ID = #{wl_ngl_id}
+	</delete>
+	
+	<delete id="deleteGroup">
+		DELETE FROM nnet_cds2.nnc_group_list
+		WHERE NGL_ID = #{ngl_id}
+	</delete>
+	
+	<select id="selectCheckedWhiteList" parameterType="map" resultType="NcWhList">
+		SELECT * FROM nnet_cds2.nnc_wh_list_sig 
+		WHERE Wl_ID = #{wl_id}
+	</select>
+	
+	<delete id="deleteCheckedWhiteList">
+		DELETE FROM nnet_cds2.nnc_wh_list_sig
+		WHERE Wl_ID = #{wl_id}
+	</delete>
+	
+	<select id="selectWhiteLisyByNglId" parameterType="map" resultType="NcWhList">
+		SELECT * FROM  nnet_cds2.nnc_wh_list_sig 
+		WHERE WL_NGL_ID = #{ngl_id}
+	</select>
+	
+	<select id="selectHostType" parameterType="map" resultType="NcWhList">
+		SELECT * FROM nnet_cds2.nnc_host_type 
+		WHERE 1=1
+		<if test="nht_id != null">
+			AND NHT_ID = #{nht_id}
+		</if>
+	</select>
+	
+</mapper>
